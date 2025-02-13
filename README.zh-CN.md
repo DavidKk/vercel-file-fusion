@@ -1,51 +1,26 @@
-[![Build Status](https://github.com/DavidKk/vercel-2fa/actions/workflows/coverage.workflow.yml/badge.svg)](https://github.com/DavidKk/vercel-2fa/actions/workflows/coverage.workflow.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![中文](https://img.shields.io/badge/%E6%96%87%E6%A1%A3-%E4%B8%AD%E6%96%87-green?style=flat-square&logo=docs)](https://github.com/DavidKk/vercel-2fa/blob/main/README.zh-CN.md) [![English](https://img.shields.io/badge/docs-English-green?style=flat-square&logo=docs)](https://github.com/DavidKk/vercel-2fa/blob/main/README.md)
+[![Build Status](https://github.com/DavidKk/vercel-file-fusion/actions/workflows/coverage.workflow.yml/badge.svg)](https://github.com/DavidKk/vercel-file-fusion/actions/workflows/coverage.workflow.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![中文](https://img.shields.io/badge/%E6%96%87%E6%A1%A3-%E4%B8%AD%E6%96%87-green?style=flat-square&logo=docs)](https://github.com/DavidKk/vercel-file-fusion/blob/main/README.zh-CN.md) [![English](https://img.shields.io/badge/docs-English-green?style=flat-square&logo=docs)](https://github.com/DavidKk/vercel-file-fusion/blob/main/README.md)
 
-# 二步验证服务
+# 文件融合服务
 
-[online](https://vercel-2fa.vercel.app)
+[online](https://vercel-file-fusion.vercel.app)
 
-一个简单易用的二步验证服务，基于 TOTP（基于时间的一次性密码）标准，实现更安全的身份验证。
+一个简单易用的文件批处理服务，支持批量压缩、加密解密和重命名文件。所有处理均在本地完成，不依赖服务器。
 
-- **用途**：提供更安全的登录验证，减少因密码泄露导致的安全问题。
-- **适用场景**：用户登录验证、敏感操作的身份确认等。
+- **用途**：提供快速的文件批处理功能，提升工作效率。
+- **适用场景**：文件批量压缩、加密解密、重命名等操作。
 
 ## 部署到 Vercel
 
-[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FYourUsername%2Ftwo-factor-auth)
-
-## 快速开始
-
-1. **生成二维码和秘钥**
-
-   - 使用提供的表单输入用户名和应用名称，生成绑定二步验证的 QR 码和 Secret。
-   - 将 Secret 存储在服务端，用户扫描 QR 码绑定到自己的验证器（如 Google Authenticator）。
-
-2. **验证用户的动态验证码**
-   - 用户输入验证器生成的 6 位动态验证码。
-   - 服务端使用存储的 Secret 和 `otplib` 库验证验证码的有效性。
-
-### 示例代码
-
-#### 验证动态验证码
-
-```typescript
-import { authenticator } from 'otplib'
-
-const isValid = authenticator.check(token, secret)
-if (isValid) {
-  console.log('Token is valid!')
-} else {
-  console.log('Token is invalid or expired.')
-}
-```
+[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FYourUsername%2Fvercel-file-fusion)
 
 ## 功能
 
-- 自动生成二步验证的密钥和绑定 QR 码。
-- 验证动态验证码的有效性。
+- 批量压缩文件。
+- 批量加密解密文件。
+- 批量重命名文件。
 - 支持 Vercel 部署，简单快速上线。
 
 ## 注意事项
 
-- **存储安全**：Secret 必须存储在服务端，且不可泄露给用户。
-- **时间同步**：确保服务器与客户端的时间同步，避免因时间偏差导致验证失败。
+- **本地处理**：所有文件处理操作均在本地完成，不会上传到服务器。
+- **数据安全**：确保文件和数据的安全性，不会泄露用户隐私。
