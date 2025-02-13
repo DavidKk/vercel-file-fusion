@@ -1,6 +1,7 @@
 {
-  "name": "vercel-2fa",
+  "name": "vercel-file-fusion",
   "version": "0.1.0",
+  "description": "Quick batch processing of locale files.",
   "private": true,
   "scripts": {
     "commit": "git-cz",
