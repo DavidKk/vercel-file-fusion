@@ -1,57 +1,57 @@
 'use client'
 
-import iconv from 'iconv-lite'
-import { BlobReader, ERR_ENCRYPTED, ERR_INVALID_PASSWORD, Uint8ArrayWriter, ZipReader } from '@zip.js/zip.js'
 import { useRef, useState } from 'react'
+import { useRequest } from 'ahooks'
+import { BlobReader, ERR_ENCRYPTED, ERR_INVALID_PASSWORD, Uint8ArrayWriter, ZipReader, ZipReaderConstructorOptions } from '@zip.js/zip.js'
 import { useDropzone } from 'react-dropzone'
-import { createDirectoryAndWriteFile, WritableFile } from '@/services/file/writer'
+import { writeFileToDirectory } from '@/services/file/writer'
 import { Ellipsis } from '@/components/Ellipsis'
 import Alert, { AlertImperativeHandler } from '@/components/Alert'
-import { useRequest } from 'ahooks'
+import { FileContent } from '@/services/file/types'
+import { transcodeEntryFileName } from '@/services/zip/decode'
 
 export default function Unzip() {
   const [currentZip, setCurrentZip] = useState('')
-  const [progress, setProgress] = useState(0)
   const [currentFile, setCurrentFile] = useState('')
+  const [totalProgress, setTotalProgress] = useState(0)
   const [password, setPassword] = useState('')
   const alertRef = useRef<AlertImperativeHandler>(null)
 
   const { run: onDrop } = useRequest(
     async (acceptedFiles: File[]) => {
       const directoryHandle = await showDirectoryPicker()
+      let totalFiles = 0
+      let processedFiles = 0
 
       for await (const file of acceptedFiles) {
         const zipFileName = file.name
         setCurrentZip(zipFileName)
 
-        const zipReader = new ZipReader(new BlobReader(file), { password })
+        const unzipOptions: ZipReaderConstructorOptions = {}
+        if (password) {
+          unzipOptions.password = password
+        }
+
+        const zipReader = new ZipReader(new BlobReader(file), unzipOptions)
         const entries = await zipReader.getEntries()
-        const totalFiles = entries.length
+        totalFiles += entries.filter((entry) => !entry.directory && entry.getData).length
 
-        let processedFiles = 0
-        const files: WritableFile[] = []
         for await (const entry of entries) {
-          if (entry.directory) {
+          if (entry.directory || !entry.getData) {
             continue
           }
 
-          if (!entry.getData) {
-            continue
-          }
-
-          let name: string
-          if (entry.filenameUTF8) {
-            name = entry.filename
-          } else {
-            const buffer = new Uint8Array(entry.rawFilename).buffer
-            name = iconv.decode(Buffer.from(buffer), 'utf-8')
-          }
-
-          setCurrentFile(name)
+          const name = transcodeEntryFileName(entry)
+          let content: FileContent
 
           try {
-            const content = await entry.getData(new Uint8ArrayWriter())
-            files.push({ name, content })
+            content = await entry.getData(new Uint8ArrayWriter(), {
+              onprogress: async (progress, total) => {
+                const readProgress = (progress / total) * 50
+                const totalProgress = ((processedFiles + readProgress / 100) / totalFiles) * 100
+                setTotalProgress(totalProgress)
+              },
+            })
           } catch (error) {
             if (error instanceof Error) {
               if (error.message === ERR_ENCRYPTED || error.message === ERR_INVALID_PASSWORD) {
@@ -62,23 +62,30 @@ export default function Unzip() {
             throw error
           }
 
-          processedFiles++
-          setProgress(Math.round((processedFiles / totalFiles) * 100))
+          await writeFileToDirectory(name, content, {
+            directoryHandle,
+            onProgress(progress, total) {
+              setCurrentFile(name)
+
+              const writeProgress = (progress / total) * 50
+              const totalProgress = ((processedFiles + 0.5 + writeProgress / 100) / totalFiles) * 100
+              setTotalProgress(totalProgress)
+            },
+          })
+
+          processedFiles += 1
         }
-
-        const name = zipFileName.split('.').slice(0, -1).join('.')
-        await createDirectoryAndWriteFile(name, files, { directoryHandle })
       }
-
-      setCurrentFile('')
-      setCurrentZip('')
-      setProgress(0)
     },
     {
       manual: true,
-      debounceWait: 1000,
       onError: (error) => {
         alertRef.current?.show(error.message, { type: 'error' })
+      },
+      onFinally: () => {
+        setTotalProgress(0)
+        setCurrentZip('')
+        setCurrentFile('')
       },
     }
   )
@@ -88,7 +95,7 @@ export default function Unzip() {
     accept: {
       zip: ['.zip'],
     },
-    disabled: progress > 0,
+    disabled: totalProgress > 0,
   })
 
   return (
@@ -98,20 +105,20 @@ export default function Unzip() {
 
         <div
           {...getRootProps()}
-          className={`border-2 border-dashed border-[4px] rounded-md border-gray-400 p-6 text-center cursor-pointer w-full h-80 flex items-center justify-center transition-opacity ${progress > 0 ? 'cursor-not-allowed opacity-50' : ''}`}
+          className={`border-2 border-dashed border-[4px] rounded-md border-gray-400 p-6 text-center cursor-pointer w-full h-80 flex items-center justify-center transition-opacity ${totalProgress > 0 ? 'cursor-not-allowed opacity-50' : ''}`}
         >
-          <input {...getInputProps()} disabled={progress > 0} />
+          <input {...getInputProps()} disabled={totalProgress > 0} />
           <p className="text-gray-500 text-md">Drag and drop ZIP files here, or click to select files</p>
         </div>
 
         <div className="mt-4 w-full h-10">
           <Alert ref={alertRef} />
 
-          {progress > 0 && (
+          {totalProgress > 0 && (
             <div className="w-auto">
               <div className="w-full bg-gray-200 rounded-lg">
-                <div className="bg-blue-600 text-md font-medium text-blue-100 text-center p-1 leading-none rounded-lg" style={{ width: `${progress}%` }}>
-                  {progress}%
+                <div className="transition-[width] bg-blue-600 text-md font-medium text-blue-100 text-center p-1 leading-none rounded-lg" style={{ width: `${totalProgress}%` }}>
+                  {totalProgress.toFixed(2)}%
                 </div>
               </div>
 

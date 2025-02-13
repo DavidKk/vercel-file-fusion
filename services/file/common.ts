@@ -6,10 +6,10 @@ export function showOpenFilePicker() {
   return window.showOpenFilePicker()
 }
 
-export function showDirectoryPicker() {
+export function showDirectoryPicker(options?: DirectoryPickerOptions) {
   if (!('showDirectoryPicker' in window)) {
     throw new Error('Directory Picker API is not supported in this browser.')
   }
 
-  return window.showDirectoryPicker()
+  return window.showDirectoryPicker(options)
 }
