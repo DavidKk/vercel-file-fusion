@@ -1,22 +1,49 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useRequest } from 'ahooks'
 import { BlobReader, ERR_ENCRYPTED, ERR_INVALID_PASSWORD, Uint8ArrayWriter, ZipReader, ZipReaderConstructorOptions } from '@zip.js/zip.js'
-import { useDropzone } from 'react-dropzone'
-import { writeFileToDirectory } from '@/services/file/writer'
-import { Ellipsis } from '@/components/Ellipsis'
-import Alert, { AlertImperativeHandler } from '@/components/Alert'
 import { FileContent } from '@/services/file/types'
 import { transcodeEntryFileName } from '@/services/zip/decode'
+import { writeFileToDirectory } from '@/services/file/writer'
+import Alert, { AlertImperativeHandler } from '@/components/Alert'
+import Picker from '@/components/Picker'
+import Meta from '@/components/Meta'
+import FileProgressBar from '@/components/FileProgressBar'
+import PageLoading from '@/components/PageLoading'
 
 export default function Unzip() {
+  const [ready, setReady] = useState(false)
   const [currentZip, setCurrentZip] = useState('')
   const [currentFile, setCurrentFile] = useState('')
   const [totalProgress, setTotalProgress] = useState(0)
   const [password, setPassword] = useState('')
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [addRootFolder, setAddRootFolder] = useState(false)
   const alertRef = useRef<AlertImperativeHandler>(null)
+
+  useEffect(() => {
+    const savedPassword = localStorage.getItem('unzipPassword')
+    const savedAddRootFolder = localStorage.getItem('unzipAddRootFolder')
+
+    if (savedPassword) {
+      setPassword(savedPassword)
+    }
+
+    if (savedAddRootFolder) {
+      setAddRootFolder(savedAddRootFolder === 'true')
+    }
+
+    setReady(true)
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('unzipPassword', password)
+  }, [password])
+
+  useEffect(() => {
+    localStorage.setItem('unzipAddRootFolder', addRootFolder.toString())
+  }, [addRootFolder])
 
   const { run: startUnzip } = useRequest(
     async () => {
@@ -43,7 +70,7 @@ export default function Unzip() {
             continue
           }
 
-          const name = transcodeEntryFileName(entry)
+          const name = addRootFolder ? `${zipFileName.replace('.zip', '')}/${transcodeEntryFileName(entry)}` : transcodeEntryFileName(entry)
           let content: FileContent
 
           try {
@@ -100,72 +127,45 @@ export default function Unzip() {
     }
   )
 
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => {
-      setSelectedFiles(acceptedFiles)
-    },
-    accept: {
-      zip: ['.zip'],
-    },
-    disabled: totalProgress > 0,
-  })
+  if (!ready) {
+    return <PageLoading />
+  }
 
   return (
     <div className="w-[100vw] h-[100vh] flex flex-col items-center">
       <div className="w-2/3 max-w-3xl mx-auto mt-10">
-        <h1 className="text-2xl font-bold mb-4">Local Unzip</h1>
-        <p className="mb-4 text-gray-700">
-          Unzip files directly in your browser. Batch decrypt and unzip. Support of the Zip64 format. Support of WinZIP AES and PKWare ZipCrypto encryption. Using @zip.js/zip.js
-          library.
-        </p>
-        <input className="w-full mb-4 p-2 border rounded" type="password" placeholder="Enter password (if any)" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Meta
+          title="Local Unzip"
+          description="Unzip files directly in your browser. Batch decrypt and unzip. Support of the Zip64 format. Support of WinZIP AES and PKWare ZipCrypto encryption. Using @zip.js/zip.js library."
+        />
 
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed border-[2px] rounded-md border-gray-400 p-6 text-center cursor-pointer w-full h-auto flex flex-col items-center justify-center transition-opacity ${totalProgress > 0 ? 'cursor-not-allowed opacity-50' : ''}`}
-        >
-          <input {...getInputProps()} disabled={totalProgress > 0} />
-          {selectedFiles.length === 0 ? (
-            <p className="text-gray-500 text-md py-10">Drag and drop ZIP files here, or click to select files</p>
-          ) : (
-            <ul className="w-full flex flex-col text-gray-700 text-md gap-2">
-              {selectedFiles.slice(0, 4).map((file) => (
-                <li key={file.name}>{file.name}</li>
-              ))}
-
-              {selectedFiles.length > 4 && <li>...</li>}
-            </ul>
-          )}
+        <div className="w-full mb-4">
+          <input className="w-full p-2 border rounded" type="text" placeholder="Enter password (if any)" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
 
-        <button
-          onClick={() => startUnzip()}
-          className="mt-4 w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50"
-          disabled={selectedFiles.length === 0 || totalProgress > 0}
-        >
+        <Picker
+          message="Drag and drop ZIP files here, or click to select files"
+          onSelect={(acceptedFiles) => setSelectedFiles(acceptedFiles)}
+          accept={{ zip: ['.zip'] }}
+          disabled={totalProgress > 0}
+          selectedFiles={selectedFiles}
+        />
+
+        <div className="w-full flex flex-col">
+          <label className="p-2 text-gray-600 inline-flex items-center cursor-pointer">
+            <input type="checkbox" checked={addRootFolder} onChange={(e) => setAddRootFolder(e.target.checked)} />
+            <span className="ml-2">Add root folder for each unzip</span>
+          </label>
+        </div>
+
+        <button onClick={() => startUnzip()} className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50" disabled={selectedFiles.length === 0 || totalProgress > 0}>
           Start Unzipping
         </button>
 
         <div className="mt-4 w-full h-10">
           <Alert ref={alertRef} />
 
-          {totalProgress > 0 && (
-            <div className="w-auto">
-              <div className="w-full bg-gray-200 rounded-lg">
-                <div className="transition-[width] bg-blue-600 text-md font-medium text-blue-100 text-center p-1 leading-none rounded-lg" style={{ width: `${totalProgress}%` }}>
-                  {totalProgress.toFixed(2)}%
-                </div>
-              </div>
-
-              <p className="text-gray-800 text-md mt-2">
-                {currentZip && `${currentZip}: extracting ${currentFile}`}
-                {totalProgress >= 100 && 'finish'}
-                <span className="pl-1 font-medium">
-                  <Ellipsis />
-                </span>
-              </p>
-            </div>
-          )}
+          {totalProgress > 0 && <FileProgressBar progress={totalProgress} message={totalProgress >= 100 ? 'Finish' : `${currentZip}: extracting ${currentFile}`} />}
         </div>
       </div>
     </div>

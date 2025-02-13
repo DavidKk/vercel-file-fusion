@@ -1,6 +1,7 @@
 export interface FileEntry {
   kind: 'file'
   name: string
+  handle: FileSystemFileHandle
 }
 
 export function isFileEntry(entry: FileEntry | DirectoryEntry): entry is FileEntry {
@@ -10,6 +11,7 @@ export function isFileEntry(entry: FileEntry | DirectoryEntry): entry is FileEnt
 export interface DirectoryEntry {
   kind: 'directory'
   name: string
+  handle: FileSystemDirectoryHandle
   files: (FileEntry | DirectoryEntry)[]
 }
 
