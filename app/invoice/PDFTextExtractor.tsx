@@ -27,7 +27,7 @@ export default function PDFTextExtractor() {
   const [targetAmountValue, setTargetAmountValue] = useState<string>()
   const [isExtracting, setIsExtracting] = useState(false)
   const [isExtracted, setIsExtracted] = useState(false)
-  const workspaceContext = useResourcePicker({ fileTypes: ['pdf'] })
+  const workspaceContext = useResourcePicker({ fileTypes: ['pdf'], only: 'file' })
   const alertRef = useRef<AlertImperativeHandler>(null)
   const { selectedHandle: workspaceHandle, selected: isWorkspaceSelected, selectableItems: availableItems, selects: selectedFiles } = workspaceContext
   const targetAmount = parseFloat(targetAmountValue || '0')
