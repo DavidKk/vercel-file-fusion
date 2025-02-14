@@ -2,10 +2,10 @@
 
 import { useRef, useState, useEffect } from 'react'
 import { useRequest } from 'ahooks'
-import { BlobReader, BlobWriter, ZipWriter, ZipWriterConstructorOptions } from '@zip.js/zip.js'
+import { BlobReader, BlobWriter, ZipWriter, type ZipWriterConstructorOptions } from '@zip.js/zip.js'
 import { globFiles, readFile } from '@/services/file/reader'
 import { showDirectoryPicker } from '@/services/file/common'
-import Alert, { AlertImperativeHandler } from '@/components/Alert'
+import Alert, { type AlertImperativeHandler } from '@/components/Alert'
 import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import FileProgressBar from '@/components/FileProgressBar'
 import PageLoading from '@/components/PageLoading'

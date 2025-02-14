@@ -5,12 +5,12 @@ import { useState, useEffect, useRef } from 'react'
 import * as pdfjsLib from 'pdfjs-dist'
 import Decimal from 'decimal.js'
 import { showDirectoryPicker } from '@/services/file/common'
-import Alert, { AlertImperativeHandler } from '@/components/Alert'
+import Alert, { type AlertImperativeHandler } from '@/components/Alert'
 import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import PageLoading from '@/components/PageLoading'
 import { extractInvoice } from './extractInvoice'
-import { InvoiceItem, InvoiceItemColor } from './InvoiceItem'
-import { Invoice as PureInvoice } from './type'
+import { InvoiceItem, type InvoiceItemColor } from './InvoiceItem'
+import type { Invoice as PureInvoice } from './type'
 
 if (typeof window !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/legacy/build/pdf.worker.mjs`
@@ -54,6 +54,7 @@ export default function PDFTextExtractor() {
 
       return textContent
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(`Failed to extract text from PDF: ${file.name}`, error)
       return null
     }
@@ -139,6 +140,7 @@ export default function PDFTextExtractor() {
           await writable.close()
           await workspaceHandle?.removeEntry(file.name)
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error(`Failed to move file ${invoice.file}`, error)
           alertRef.current?.show(`Failed to move file ${invoice.file}`, { type: 'error' })
         }

@@ -1,4 +1,4 @@
-import { Invoice } from './type'
+import type { Invoice } from './type'
 
 export function extractInvoice(text: string): Invoice {
   const noRegex = /[\u53d1][\u7968][\u53f7][\u7801][：:](?:\s+)(\d+)(?:\s+?)/

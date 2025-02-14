@@ -1,5 +1,5 @@
 import iconv from 'iconv-lite'
-import { Entry } from '@zip.js/zip.js'
+import type { Entry } from '@zip.js/zip.js'
 
 export function transcodeEntryFileName(entry: Entry) {
   if (entry.filenameUTF8) {

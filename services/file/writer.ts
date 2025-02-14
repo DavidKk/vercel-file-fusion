@@ -1,4 +1,4 @@
-import { FileContent } from './types'
+import type { FileContent } from './types'
 import { showDirectoryPicker } from './common'
 
 export interface WritableFile {
