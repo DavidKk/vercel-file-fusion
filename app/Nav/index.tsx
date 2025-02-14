@@ -10,6 +10,7 @@ export function Nav() {
       <div className="ml-10 flex gap-4">
         <Link href="/zip">Zip</Link>
         <Link href="/unzip">Unzip</Link>
+        <Link href="/invoice">Invoice Optimizer</Link>
       </div>
     </nav>
   )

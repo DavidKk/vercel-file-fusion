@@ -44,7 +44,7 @@ export default function ResourcePicker(props: ResourcePickerProps) {
           <p className="text-gray-400 text-xl py-10">Select Directory</p>
         </div>
       ) : (
-        <div className="mt-4 w-full flex flex-col gap-2">
+        <div className="w-full flex flex-col gap-2">
           {selectableItems.length === 0 ? (
             <div onClick={onWorkspaceSelect} className="text-gray-500 text-md py-10 text-center cursor-pointer">
               <p>No items available and click re-choose</p>

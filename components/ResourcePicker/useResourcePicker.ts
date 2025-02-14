@@ -9,7 +9,7 @@ interface UseResourcePickerOptions {
 export default function useResourcePicker(options: UseResourcePickerOptions) {
   const { only, fileTypes } = options || {}
   const [selectedHandle, setSelectedHandle] = useState<FileSystemDirectoryHandle>()
-  const [selectableItems, setFolders] = useState<(FileSystemDirectoryHandle | FileSystemFileHandle)[]>([])
+  const [selectableItems, setSelectableItems] = useState<(FileSystemDirectoryHandle | FileSystemFileHandle)[]>([])
   const [selects, setSelects] = useState<Set<string>>(new Set())
 
   const syncWorkspace = async (handle: FileSystemDirectoryHandle) => {
@@ -27,7 +27,8 @@ export default function useResourcePicker(options: UseResourcePickerOptions) {
       }
     }
 
-    setFolders([...directories, ...files])
+    const sortedItems = [...directories, ...files].sort((a, b) => a.name.localeCompare(b.name))
+    setSelectableItems(sortedItems)
   }
 
   const handleSelect = async () => {
@@ -42,7 +43,7 @@ export default function useResourcePicker(options: UseResourcePickerOptions) {
     selected: !!selectedHandle,
     selectedHandle,
     selectableItems,
-    setFolders,
+    setSelectableItems,
     handleSelect,
     setSelects,
     onItemSelect: setSelects,

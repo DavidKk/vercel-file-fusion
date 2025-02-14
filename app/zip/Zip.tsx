@@ -6,7 +6,6 @@ import { BlobReader, BlobWriter, ZipWriter, ZipWriterConstructorOptions } from '
 import { globFiles, readFile } from '@/services/file/reader'
 import { showDirectoryPicker } from '@/services/file/common'
 import Alert, { AlertImperativeHandler } from '@/components/Alert'
-import Meta from '@/components/Meta'
 import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import FileProgressBar from '@/components/FileProgressBar'
 import PageLoading from '@/components/PageLoading'
@@ -120,41 +119,31 @@ export default function Zip() {
   }
 
   return (
-    <div className="w-[100vw] h-[100vh] flex flex-col items-center">
-      <div className="flex flex-col gap-4 w-2/3 max-w-3xl mx-auto mt-10">
-        <Meta title="Local Zip" description="Zip files directly in your browser. Batch compress availableFolders into zip files. Using @zip.js/zip.js library." />
+    <div className="flex flex-col gap-2">
+      <ResourcePicker {...workspaceContext} disabled={loading} />
 
-        <ResourcePicker {...workspaceContext} disabled={loading} />
+      {isWorkspaceSelected && (
+        <>
+          <div className="w-full">
+            <input className="w-full p-2 border rounded" type="text" placeholder="Enter password (if any)" value={password} onChange={(event) => setPassword(event.target.value)} />
+          </div>
 
-        {isWorkspaceSelected && (
-          <>
-            <div className="w-full">
-              <input
-                className="w-full p-2 border rounded"
-                type="text"
-                placeholder="Enter password (if any)"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-            </div>
+          <div className="w-full flex flex-col">
+            <label className="text-gray-600 inline-flex items-center cursor-pointer">
+              <input type="checkbox" checked={addRootFolder} onChange={(e) => setAddRootFolder(e.target.checked)} />
+              <span className="ml-2">Add root folder for each zip</span>
+            </label>
+          </div>
 
-            <div className="w-full flex flex-col">
-              <label className="text-gray-600 inline-flex items-center cursor-pointer">
-                <input type="checkbox" checked={addRootFolder} onChange={(e) => setAddRootFolder(e.target.checked)} />
-                <span className="ml-2">Add root folder for each zip</span>
-              </label>
-            </div>
+          <button onClick={() => startZip()} className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50" disabled={selectedFolders.size === 0 || totalProgress > 0}>
+            Start Zipping
+          </button>
+        </>
+      )}
 
-            <button onClick={() => startZip()} className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50" disabled={selectedFolders.size === 0 || totalProgress > 0}>
-              Start Zipping
-            </button>
-          </>
-        )}
-
-        <div className="w-full h-10 flex flex-col gap-4">
-          <Alert ref={alertRef} />
-          {totalProgress > 0 && <FileProgressBar progress={totalProgress} message={totalProgress >= 100 ? 'Finish' : `${currentFolder}: compressing ${currentFile}`} />}
-        </div>
+      <div className="w-full h-10 flex flex-col gap-4">
+        <Alert ref={alertRef} />
+        {totalProgress > 0 && <FileProgressBar progress={totalProgress} message={totalProgress >= 100 ? 'Finish' : `${currentFolder}: compressing ${currentFile}`} />}
       </div>
     </div>
   )

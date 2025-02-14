@@ -8,8 +8,8 @@ export default function Meta(props: MetaProps) {
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-4">{title}</h1>
-      <p className="mb-4 text-gray-700">{description}</p>
+      <h1 className="text-2xl font-bold">{title}</h1>
+      <p className="text-gray-700">{description}</p>
     </>
   )
 }

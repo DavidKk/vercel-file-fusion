@@ -20,11 +20,16 @@
     "ok": "pnpm format && pnpm lint && pnpm build && pnpm test"
   },
   "dependencies": {
+    "@types/pdf-parse": "^1.1.4",
     "@types/wicg-file-system-access": "^2023.10.5",
     "@zip.js/zip.js": "^2.7.57",
     "ahooks": "^3.8.4",
+    "decimal.js": "^10.5.0",
     "iconv-lite": "^0.6.3",
     "next": "15.1.3",
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^4.10.38",
+    "pnpm": "^10.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.5"

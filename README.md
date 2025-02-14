@@ -18,9 +18,14 @@ A simple and easy-to-use file batch processing service that supports batch compr
 - Batch compress files.
 - Batch encrypt and decrypt files.
 - Batch rename files.
+- Extract and optimize invoice information from PDF files.
 - Supports Vercel deployment, simple and quick to go live.
 
 ## Notes
 
 - **Local Processing**: All file processing operations are done locally and will not be uploaded to the server.
 - **Data Security**: Ensure the security of files and data, and do not leak user privacy.
+
+## PDF Invoice Optimizer
+
+This tool analyzes the amounts from PDF electronic invoices and applies an algorithm to determine the optimal combination of invoices for reimbursement. It efficiently identifies the most suitable invoice set based on the input amount, ensuring the best possible match for expense reporting.
