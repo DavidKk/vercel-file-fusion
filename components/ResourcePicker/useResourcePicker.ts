@@ -1,26 +1,33 @@
 import { useInterval } from 'ahooks'
 import { useState } from 'react'
 
-export default function useWorkspace() {
+interface UseResourcePickerOptions {
+  only?: 'file' | 'directory'
+  fileTypes?: string[]
+}
+
+export default function useResourcePicker(options: UseResourcePickerOptions) {
+  const { only, fileTypes } = options || {}
   const [selectedHandle, setSelectedHandle] = useState<FileSystemDirectoryHandle>()
-  const [files, setFiles] = useState<FileSystemFileHandle[]>([])
-  const [selectableItems, setFolders] = useState<FileSystemDirectoryHandle[]>([])
+  const [selectableItems, setFolders] = useState<(FileSystemDirectoryHandle | FileSystemFileHandle)[]>([])
   const [selects, setSelects] = useState<Set<string>>(new Set())
 
   const syncWorkspace = async (handle: FileSystemDirectoryHandle) => {
-    const selectableItems = []
+    const directories = []
     const files = []
 
     for await (const entry of handle.values()) {
-      if (entry.kind === 'directory') {
-        selectableItems.push(entry)
-      } else if (entry.kind === 'file') {
-        files.push(entry)
+      if (only !== 'file' && entry.kind === 'directory') {
+        directories.push(entry)
+      } else if (only !== 'directory' && entry.kind === 'file') {
+        const extname = entry.name.split('.').pop()!
+        if (!fileTypes || fileTypes.includes(extname)) {
+          files.push(entry)
+        }
       }
     }
 
-    setFolders(selectableItems)
-    setFiles(files)
+    setFolders([...directories, ...files])
   }
 
   const handleSelect = async () => {
@@ -34,7 +41,6 @@ export default function useWorkspace() {
   return {
     selected: !!selectedHandle,
     selectedHandle,
-    files,
     selectableItems,
     setFolders,
     handleSelect,

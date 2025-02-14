@@ -7,7 +7,7 @@ import { globFiles, readFile } from '@/services/file/reader'
 import { showDirectoryPicker } from '@/services/file/common'
 import Alert, { AlertImperativeHandler } from '@/components/Alert'
 import Meta from '@/components/Meta'
-import WorkspacePicker, { useWorkspace } from '@/components/WorkspacePicker'
+import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import FileProgressBar from '@/components/FileProgressBar'
 import PageLoading from '@/components/PageLoading'
 import { EXCLUDES_FILES } from './constants'
@@ -21,14 +21,8 @@ export default function Zip() {
   const [addRootFolder, setAddRootFolder] = useState(false)
   const alertRef = useRef<AlertImperativeHandler>(null)
 
-  const workspaceContext = useWorkspace()
-  const {
-    selected: isWorkspaceSelected,
-    selectedHandle: workspaceHandle,
-    selects: selectedFolders,
-    selectableItems: availableFolders,
-    setSelects: setSelectedFolders,
-  } = workspaceContext
+  const workspaceContext = useResourcePicker({ fileTypes: ['zip'] })
+  const { selected: isWorkspaceSelected, selects: selectedFolders, selectableItems: availableItems, setSelects: setSelectedFolders } = workspaceContext
 
   useEffect(() => {
     setReady(true)
@@ -40,23 +34,32 @@ export default function Zip() {
       const totalFolders = selectedFolders.size
       let processedFolders = 0
 
-      for await (const folderHandle of availableFolders) {
-        if (!selectedFolders.has(folderHandle.name)) {
+      for await (const itemHandle of availableItems) {
+        if (!selectedFolders.has(itemHandle.name)) {
           continue
         }
 
-        const folderName = folderHandle.name
-        setCurrentFolder(folderName)
+        const itemName = itemHandle.name
+        setCurrentFolder(itemName)
 
         const zipOptions: ZipWriterConstructorOptions = {}
         if (password) {
           zipOptions.password = password
         }
 
-        const files = await globFiles(folderHandle)
+        let files = []
+        if (itemHandle.kind === 'directory') {
+          const fileEntries = await globFiles(itemHandle)
+          for (const fileEntry of fileEntries) {
+            files.push(fileEntry.handle)
+          }
+        } else {
+          files.push(itemHandle)
+        }
+
         const totalFiles = files.length
         if (totalFiles === 0) {
-          alertRef.current?.show(`File ${folderHandle.name} is empty and will be skipped.`, { type: 'warn' })
+          alertRef.current?.show(`File ${itemHandle.name} is empty and will be skipped.`, { type: 'warn' })
           continue
         }
 
@@ -69,9 +72,9 @@ export default function Zip() {
             continue
           }
 
-          const fileData = await readFile(file.handle)
+          const fileData = await readFile(file)
           const blob = new Blob([fileData], { type: 'text/plain' })
-          const fileName = addRootFolder ? `${folderName}/${file.name}` : file.name
+          const fileName = addRootFolder ? `${itemName}/${file.name}` : file.name
           await zipWriter.add(fileName, new BlobReader(blob), {
             onprogress: async (progress, total) => {
               const writeProgress = (progress / total) * 50
@@ -84,8 +87,8 @@ export default function Zip() {
         }
 
         const zipBlob = await zipWriter.close()
-        const zipFile = new File([zipBlob], `${folderName}.zip`, { type: 'application/zip' })
-        const writable = await outputDirHandle.getFileHandle(`${folderName}.zip`, { create: true })
+        const zipFile = new File([zipBlob], `${itemName}.zip`, { type: 'application/zip' })
+        const writable = await outputDirHandle.getFileHandle(`${itemName}.zip`, { create: true })
         const writableStream = await writable.createWritable()
         await writableStream.write(zipFile)
         await writableStream.close()
@@ -121,7 +124,7 @@ export default function Zip() {
       <div className="flex flex-col gap-4 w-2/3 max-w-3xl mx-auto mt-10">
         <Meta title="Local Zip" description="Zip files directly in your browser. Batch compress availableFolders into zip files. Using @zip.js/zip.js library." />
 
-        <WorkspacePicker {...workspaceContext} disabled={loading} />
+        <ResourcePicker {...workspaceContext} disabled={loading} />
 
         {isWorkspaceSelected && (
           <>
