@@ -94,6 +94,11 @@ export default function PDFTextExtractor() {
 
   const findClosestInvoices = (invoices: Invoice[], target: number) => {
     const validInvoices = invoices.filter(({ amount }) => amount)
+    const validSum = validInvoices.reduce((sum, invoice) => sum + (invoice.amount ?? 0), 0)
+    if (validSum < target) {
+      return { closestInvoices: validInvoices, closestSum: validSum }
+    }
+
     const sortedInvoices = validInvoices.sort((a, b) => (a.amount ?? 0) - (b.amount ?? 0))
 
     let closestSum = 0
@@ -149,6 +154,7 @@ export default function PDFTextExtractor() {
     {
       manual: true,
       onSuccess: () => {
+        handleReset()
         alertRef.current?.show('Files moved successfully', { type: 'success' })
       },
       onError: (error) => {
@@ -200,20 +206,22 @@ export default function PDFTextExtractor() {
 
           <div className="w-full flex flex-col gap-2">
             {usedInvoices.length ? (
-              <div className="w-full flex flex-col gap-2 pb-1 max-h-[40vh] overflow-y-auto">
-                {renderInvoice(usedInvoices, 'selected')}
+              <>
+                <div className="w-full flex flex-col gap-2 pb-1 max-h-[40vh] overflow-y-auto">
+                  {renderInvoice(usedInvoices, 'selected')}
+                </div>
 
-                <p>
-                  {closestSum}/{targetAmount}
-                </p>
-                {closestSum < (targetAmount ?? 0) && <div className="text-red-500 text-center">Insufficient amount. Missing: ￥{(targetAmount ?? 0) - closestSum}</div>}
+                <div className="flex items-center justify-between px-2">
+                  <span>Sum: <b>￥{closestSum}</b></span>
+                  {closestSum < (targetAmount ?? 0) && <span>Missing: <b className="text-red-400">￥{(targetAmount ?? 0) - closestSum}</b></span>}
+                </div>
 
                 <button disabled={isExtracting} onClick={handleMoveFiles} className="w-full bg-green-500 text-white p-2 rounded disabled:opacity-50">
                   Move Above PDFs
                 </button>
 
                 <Alert ref={alertRef} />
-              </div>
+              </>
             ) : null}
 
             {!unusedInvoices.length ? null : <div className="w-full flex flex-col gap-2 pb-1 max-h-[40vh] overflow-y-auto">{renderInvoice(unusedInvoices)}</div>}
