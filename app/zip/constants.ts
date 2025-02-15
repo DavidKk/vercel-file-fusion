@@ -7,4 +7,5 @@ export const EXCLUDES_FILES = [
   '.fseventsd', // macOS: File system event logs.
   '._*', // macOS: Metadata files created when copying files to non-macOS systems.
   'Icon\r', // macOS: Folder icon file.
+  '__MACOSX', // macOS: Stores metadata for macOS applications.
 ]
