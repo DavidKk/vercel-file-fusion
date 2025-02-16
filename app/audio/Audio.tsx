@@ -10,7 +10,7 @@ import Alert, { type AlertImperativeHandler } from '@/components/Alert'
 import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import PageLoading from '@/components/PageLoading'
 import FileProgressBar from '@/components/FileProgressBar'
-import { LYRICS_EXTNAME } from './constants'
+import { COVER_EXTNAME, LYRICS_EXTNAME } from './constants'
 
 export default function Audio() {
   const [ready, setReady] = useState(false)
@@ -45,7 +45,7 @@ export default function Audio() {
         setCurrentFile(itemName)
 
         const name = itemName.split('.').slice(0, -1).join('.')
-        // const possibleCovers = COVER_EXTNAME.map((extname) => `${name}${extname}`)
+        const possibleCovers = COVER_EXTNAME.map((extname) => `${name}${extname}`)
         const possibleLyrics = LYRICS_EXTNAME.map((extname) => `${name}${extname}`)
 
         // const coverEntry = entries.find((entry) => {
@@ -58,18 +58,23 @@ export default function Audio() {
           return possibleLyrics.includes(filename)
         })
 
-        const LYRICS = lyricsEntry ? await readFile(lyricsEntry.handle) : undefined
-        const arrayBuffer = await readFileToArrayBuffer(itemHandle)
-        const content = embedFlacMetadata(arrayBuffer, { LYRICS })
-
-        await writeFileToDirectory(itemName, content, {
-          directoryHandle: outputDirHandle,
-          onProgress(progress, total) {
-            const writeProgress = (progress / total) * 100
-            const totalProgress = ((processedFiles + writeProgress / 100) / totalFiles) * 100
-            setTotalProgress(totalProgress)
-          },
-        })
+        try {
+          const LYRICS = lyricsEntry ? await readFile(lyricsEntry.handle) : undefined
+          const arrayBuffer = await readFileToArrayBuffer(itemHandle)
+          const content = embedFlacMetadata(arrayBuffer, { LYRICS })
+  
+          await writeFileToDirectory(itemName, content, {
+            directoryHandle: outputDirHandle,
+            onProgress(progress, total) {
+              const writeProgress = (progress / total) * 100
+              const totalProgress = ((processedFiles + writeProgress / 100) / totalFiles) * 100
+              setTotalProgress(totalProgress)
+            },
+          })
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
 
         processedFiles += 1
         setTotalProgress((processedFiles / totalFiles) * 100)
