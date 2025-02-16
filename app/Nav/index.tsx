@@ -11,6 +11,7 @@ export function Nav() {
         <Link href="/zip">Zip</Link>
         <Link href="/unzip">Unzip</Link>
         <Link href="/invoice">Invoice Optimizer</Link>
+        <Link href="/audio">Audio Embedder</Link>
       </div>
     </nav>
   )

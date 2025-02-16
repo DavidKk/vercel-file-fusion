@@ -207,13 +207,17 @@ export default function PDFTextExtractor() {
           <div className="w-full flex flex-col gap-2">
             {usedInvoices.length ? (
               <>
-                <div className="w-full flex flex-col gap-2 pb-1 max-h-[40vh] overflow-y-auto">
-                  {renderInvoice(usedInvoices, 'selected')}
-                </div>
+                <div className="w-full flex flex-col gap-2 pb-1 max-h-[40vh] overflow-y-auto">{renderInvoice(usedInvoices, 'selected')}</div>
 
                 <div className="flex items-center justify-between px-2">
-                  <span>Sum: <b>￥{closestSum}</b></span>
-                  {closestSum < (targetAmount ?? 0) && <span>Missing: <b className="text-red-400">￥{(targetAmount ?? 0) - closestSum}</b></span>}
+                  <span>
+                    Sum: <b>￥{closestSum}</b>
+                  </span>
+                  {closestSum < (targetAmount ?? 0) && (
+                    <span>
+                      Missing: <b className="text-red-400">￥{(targetAmount ?? 0) - closestSum}</b>
+                    </span>
+                  )}
                 </div>
 
                 <button disabled={isExtracting} onClick={handleMoveFiles} className="w-full bg-green-500 text-white p-2 rounded disabled:opacity-50">

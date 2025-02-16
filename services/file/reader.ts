@@ -6,6 +6,12 @@ export async function readFile(fileHandle: FileSystemFileHandle) {
   return contents
 }
 
+export async function readFileToArrayBuffer(fileHandle: FileSystemFileHandle) {
+  const file = await fileHandle.getFile()
+  const contents = await file.arrayBuffer()
+  return contents
+}
+
 export async function readdir(directoryHandle?: FileSystemDirectoryHandle): Promise<Array<FileEntry | DirectoryEntry>> {
   if (!directoryHandle) {
     directoryHandle = await showDirectoryPicker()

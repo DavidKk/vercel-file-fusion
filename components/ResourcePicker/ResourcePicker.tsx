@@ -15,7 +15,7 @@ export default function ResourcePicker(props: ResourcePickerProps) {
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const allItemNames = new Set(selectableItems.map((item) => item.name))
+      const allItemNames = new Set(selectableItems.map(({ name }) => name))
       onItemSelect(allItemNames)
     } else {
       onItemSelect(new Set())
