@@ -1,3 +1,6 @@
+/**
+ * @see https://www.rfc-editor.org/rfc/rfc9639.html#appendix-D.1.3
+ */
 export class FlacMetadata {
   static MAX_BLOCK_SIZE = (1 << 24) - 1
 

@@ -11,7 +11,7 @@ export class FlacVorbis extends FlacMetadata {
     return bufferFromVorbisComments(this.comments, this.vendor)
   }
 
-  constructor(byte: number, data?: ArrayBuffer) {
+  constructor(byte: number = FlacVorbis.TYPE, data?: ArrayBuffer) {
     super(byte, new ArrayBuffer(0))
 
     if (data) {

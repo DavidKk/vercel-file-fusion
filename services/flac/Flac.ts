@@ -1,3 +1,4 @@
+import { MAX_CONTENT_SIZE } from './constants'
 import type { CoverImageMetadata } from './FlacCover'
 import { FlacCover } from './FlacCover'
 import { FlacMetadata } from './FlacMetadata'
@@ -47,7 +48,7 @@ export class Flac {
   public setCoverImage(image: ArrayBuffer, metadata?: Partial<CoverImageMetadata>) {
     let cover = this.metadatas.find((metadata) => metadata instanceof FlacCover)
     if (!cover) {
-      cover = new FlacCover(FlacCover.TYPE)
+      cover = new FlacCover()
       cover.updateImage(image, metadata)
       this.metadatas.splice(0, 0, cover)
     }
@@ -58,7 +59,7 @@ export class Flac {
   public setVorbisComment(key: string, value: string) {
     let vorbis = this.metadatas.find((metadata) => metadata instanceof FlacVorbis)
     if (!vorbis) {
-      vorbis = new FlacVorbis(FlacVorbis.TYPE, new ArrayBuffer(0))
+      vorbis = new FlacVorbis()
       this.metadatas.splice(0, 0, vorbis)
     }
 
@@ -73,9 +74,19 @@ export class Flac {
     }, [])
 
     const audioContent = new Uint8Array(this.audioContent)
-    const updatedArrayBuffer = new Uint8Array(datas)
-
     const header = new Uint8Array([0x66, 0x4c, 0x61, 0x43]) // "fLaC"
-    return new Uint8Array([...header, ...updatedArrayBuffer, ...audioContent]).buffer
+
+    const totalLength = header.length + datas.length + audioContent.length
+    if (totalLength > MAX_CONTENT_SIZE) {
+      throw new Error('Flac content size is too large')
+    }
+
+    const data = new Uint8Array(totalLength)
+
+    data.set(header, 0)
+    data.set(datas, header.length)
+    data.set(audioContent, header.length + datas.length)
+
+    return data.buffer
   }
 }

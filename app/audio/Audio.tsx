@@ -6,6 +6,8 @@ import { showDirectoryPicker } from '@/services/file/common'
 import { globFiles, readFile, readFileToArrayBuffer } from '@/services/file/reader'
 import { writeFileToDirectory } from '@/services/file/writer'
 import { embedFlacMetadata } from '@/services/flac'
+import { getImageMimeType } from '@/services/image/getImageMimeType'
+import { getImageSize } from '@/services/image/getImageSize'
 import Alert, { type AlertImperativeHandler } from '@/components/Alert'
 import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import PageLoading from '@/components/PageLoading'
@@ -48,10 +50,10 @@ export default function Audio() {
         const possibleCovers = COVER_EXTNAME.map((extname) => `${name}${extname}`)
         const possibleLyrics = LYRICS_EXTNAME.map((extname) => `${name}${extname}`)
 
-        // const coverEntry = entries.find((entry) => {
-        //   const filename = entry.name.split('/').pop()!
-        //   return possibleCovers.includes(filename)
-        // })
+        const coverEntry = entries.find((entry) => {
+          const filename = entry.name.split('/').pop()!
+          return possibleCovers.includes(filename)
+        })
 
         const lyricsEntry = entries.find((entry) => {
           const filename = entry.name.split('/').pop()!
@@ -59,10 +61,15 @@ export default function Audio() {
         })
 
         try {
+          const cover = coverEntry ? await readFileToArrayBuffer(coverEntry.handle) : undefined
+          const format = coverEntry ? getImageMimeType(coverEntry?.name) : undefined
+          const coverSize = cover && format ? await getImageSize(cover, format) : {}
+          const coverMetadata = { ...coverSize, format }
+
           const LYRICS = lyricsEntry ? await readFile(lyricsEntry.handle) : undefined
           const arrayBuffer = await readFileToArrayBuffer(itemHandle)
-          const content = embedFlacMetadata(arrayBuffer, { LYRICS })
-  
+          const content = embedFlacMetadata(arrayBuffer, { LYRICS, cover, coverMetadata })
+
           await writeFileToDirectory(itemName, content, {
             directoryHandle: outputDirHandle,
             onProgress(progress, total) {
