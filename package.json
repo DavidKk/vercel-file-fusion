@@ -25,6 +25,7 @@
     "@zip.js/zip.js": "^2.7.57",
     "ahooks": "^3.8.4",
     "decimal.js": "^10.5.0",
+    "feather-icons-react": "^0.7.1",
     "iconv-lite": "^0.6.3",
     "music-metadata": "^10.9.0",
     "next": "15.1.3",

@@ -23,6 +23,9 @@ importers:
       decimal.js:
         specifier: ^10.5.0
         version: 10.5.0
+      feather-icons-react:
+        specifier: ^0.7.1
+        version: 0.7.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       iconv-lite:
         specifier: ^0.6.3
         version: 0.6.3
@@ -1948,6 +1951,12 @@ packages:
 
   fb-watchman@2.0.2:
     resolution: {integrity: sha512-p5161BqbuCaSnB8jIbzQHOlpgsPmK5rJVDfDKO91Axs5NC1uu3HRQm6wt9cd9/+GtQQIO53JdGXXoyDpTAsgYA==}
+
+  feather-icons-react@0.7.1:
+    resolution: {integrity: sha512-autpDFj3/OzSfRRN0Ua3m5ysJG/PNGul5V2eznqIw1/5GrDrDW1QYs+2QgOFxzh+ImZNfC2v8+iOAdVpLpUFgA==}
+    peerDependencies:
+      react: ^16.8.4 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.4 || ^17.0.0 || ^18.0.0
 
   figures@2.0.0:
     resolution: {integrity: sha512-Oa2M9atig69ZkfwiApY8F2Yy+tzMbazyvqv21R0NsSC8floSOC09BbT1ITWAdoMGQvJ/aZnR1KMwdx9tvHnTNA==}
@@ -6110,6 +6119,11 @@ snapshots:
   fb-watchman@2.0.2:
     dependencies:
       bser: 2.1.1
+
+  feather-icons-react@0.7.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
+    dependencies:
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
 
   figures@2.0.0:
     dependencies:

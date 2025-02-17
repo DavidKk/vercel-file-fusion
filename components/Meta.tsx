@@ -1,5 +1,7 @@
+import type { ReactElement } from 'react'
+
 export interface MetaProps {
-  title?: string
+  title?: string | ReactElement
   description?: string
 }
 
@@ -8,7 +10,7 @@ export default function Meta(props: MetaProps) {
 
   return (
     <>
-      <h1 className="text-2xl font-bold">{title}</h1>
+      <h1 className="text-2xl font-bold flex items-center gap-2">{title}</h1>
       <p className="text-gray-700">{description}</p>
     </>
   )
