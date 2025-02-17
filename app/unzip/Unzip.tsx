@@ -149,7 +149,7 @@ export default function Unzip() {
         </label>
       </div>
 
-      <button onClick={() => startUnzip()} className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50" disabled={selectedFiles.length === 0 || totalProgress > 0}>
+      <button onClick={() => startUnzip()} className="w-full bg-indigo-600 text-white p-2 rounded disabled:opacity-50" disabled={selectedFiles.length === 0 || totalProgress > 0}>
         Start Unzipping
       </button>
 

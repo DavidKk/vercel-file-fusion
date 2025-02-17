@@ -188,7 +188,7 @@ export default function PDFTextExtractor() {
           <ResourcePicker {...workspaceContext} disabled={isExtracting} />
 
           {isWorkspaceSelected && (
-            <button onClick={handleExtractText} className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50" disabled={selectedFiles.size === 0 || isExtracting}>
+            <button onClick={handleExtractText} className="w-full bg-indigo-600 text-white p-2 rounded disabled:opacity-50" disabled={selectedFiles.size === 0 || isExtracting}>
               Parse Invoice Information
             </button>
           )}

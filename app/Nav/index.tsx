@@ -3,7 +3,7 @@ import FeatherIcon from 'feather-icons-react'
 
 export function Nav() {
   return (
-    <nav className="w-full p-4 bg-blue-500 text-white">
+    <nav className="w-full p-4 bg-indigo-500 text-white">
       <div className="container-md flex items-center">
         <h1 className="text-xl font-bold">
           <Link href="/">File Fusion</Link>

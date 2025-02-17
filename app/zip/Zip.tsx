@@ -135,7 +135,7 @@ export default function Zip() {
             </label>
           </div>
 
-          <button onClick={() => startZip()} className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50" disabled={selectedFolders.size === 0 || totalProgress > 0}>
+          <button onClick={() => startZip()} className="w-full bg-indigo-600 text-white p-2 rounded disabled:opacity-50" disabled={selectedFolders.size === 0 || totalProgress > 0}>
             Start Zipping
           </button>
         </>

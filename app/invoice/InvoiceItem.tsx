@@ -12,7 +12,7 @@ export interface InvoiceItemProps extends Invoice {
 export function InvoiceItem(props: InvoiceItemProps) {
   const { file, code, amount, date, loading, color } = props
   const colors = {
-    selected: 'bg-blue-100',
+    selected: 'bg-indigo-100',
     error: 'bg-red-100',
     normal: 'bg-white',
   }
@@ -23,7 +23,7 @@ export function InvoiceItem(props: InvoiceItemProps) {
 
       {loading ? (
         <div className="col-span-3 flex items-center justify-end">
-          <Spinner color="text-blue-600" />
+          <Spinner color="text-indigo-600" />
         </div>
       ) : !amount ? (
         <span className="col-span-3 text-center">unidentified</span>

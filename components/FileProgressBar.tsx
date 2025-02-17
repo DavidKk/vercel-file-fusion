@@ -12,7 +12,7 @@ export default function FileProgressBar(props: FileProgressBarProps) {
   return (
     <div className="w-auto">
       <div className="w-full bg-gray-200 rounded-lg">
-        <div className="transition-[width] bg-blue-600 text-md font-medium text-blue-100 text-center p-1 leading-none rounded-lg" style={{ width: `${progress}%` }}>
+        <div className="transition-[width] bg-indigo-600 text-md font-medium text-indigo-100 text-center p-1 leading-none rounded-lg" style={{ width: `${progress}%` }}>
           {progress.toFixed(2)}%
         </div>
       </div>
