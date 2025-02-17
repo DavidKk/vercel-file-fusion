@@ -4,10 +4,10 @@
 
 [online](https://vercel-file-fusion.vercel.app)
 
-A simple and easy-to-use file batch processing service that supports batch compression, encryption and decryption, and renaming of files. All processing is done locally, without relying on a server.
+A simple and easy-to-use file batch processing service that supports batch compression, encryption/decryption, and renaming of files. All processing is done locally without relying on a server.
 
-- **Purpose**: Provide quick file batch processing functions to improve work efficiency.
-- **Applicable Scenarios**: Batch compression, encryption and decryption, renaming of files, etc.
+- **Purpose**: Provide fast file batch processing functions to improve work efficiency.
+- **Applicable Scenarios**: Batch file compression, encryption/decryption, renaming, etc.
 
 ## Deploy to Vercel
 
@@ -16,16 +16,25 @@ A simple and easy-to-use file batch processing service that supports batch compr
 ## Features
 
 - Batch compress files.
-- Batch encrypt and decrypt files.
+- Batch encrypt/decrypt files.
 - Batch rename files.
-- Extract and optimize invoice information from PDF files.
-- Supports Vercel deployment, simple and quick to go live.
+- Reimbursement tool.
+- Audio file metadata embedding tool.
+- Support Vercel deployment for quick and easy online access.
 
 ## Notes
 
 - **Local Processing**: All file processing operations are done locally and will not be uploaded to the server.
-- **Data Security**: Ensure the security of files and data, and do not leak user privacy.
+- **Data Security**: Ensure the security of files and data, and will not leak user privacy.
 
-## PDF Invoice Optimizer
+## Reimbursement Tool
 
-This tool analyzes the amounts from PDF electronic invoices and applies an algorithm to determine the optimal combination of invoices for reimbursement. It efficiently identifies the most suitable invoice set based on the input amount, ensuring the best possible match for expense reporting.
+This tool analyzes the amounts in PDF electronic invoices and applies algorithms to determine the best combination of reimbursement invoices. It can efficiently identify the most suitable set of invoices based on the input amount, ensuring the best match for reimbursement.
+
+## Audio Metadata Embedding Tool
+
+This tool is used to embed metadata into FLAC audio files. Currently, it only supports embedding lyrics and FLAC files. Please ensure the lyrics file name matches the audio file name.
+
+## Audio File Metadata Embedding Tool
+
+This tool is used to embed metadata into FLAC audio files. Currently, it supports embedding lyrics and cover images. Please ensure the lyrics file name matches the audio file name, and the cover image file is located in the same directory.
