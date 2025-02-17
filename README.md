@@ -31,10 +31,6 @@ A simple and easy-to-use file batch processing service that supports batch compr
 
 This tool analyzes the amounts in PDF electronic invoices and applies algorithms to determine the best combination of reimbursement invoices. It can efficiently identify the most suitable set of invoices based on the input amount, ensuring the best match for reimbursement.
 
-## Audio Metadata Embedding Tool
-
-This tool is used to embed metadata into FLAC audio files. Currently, it only supports embedding lyrics and FLAC files. Please ensure the lyrics file name matches the audio file name.
-
 ## Audio File Metadata Embedding Tool
 
 This tool is used to embed metadata into FLAC audio files. Currently, it supports embedding lyrics and cover images. Please ensure the lyrics file name matches the audio file name, and the cover image file is located in the same directory.
