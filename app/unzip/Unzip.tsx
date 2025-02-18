@@ -132,7 +132,7 @@ export default function Unzip() {
 
   return (
     <div className="flex flex-col gap-2">
-      <input className="w-full p-2 border rounded" type="text" placeholder="Enter password (if any)" value={password} onChange={(e) => setPassword(e.target.value)} />
+      <input className="w-full p-2 border rounded" type="password" placeholder="Enter password (if any)" value={password} onChange={(e) => setPassword(e.target.value)} />
 
       <Picker
         message="Drag and drop ZIP files here, or click to select files"
