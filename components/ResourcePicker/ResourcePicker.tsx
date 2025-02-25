@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
+import type { DirectoryEntry, FileEntry } from '@/services/file/types'
 
 export interface ResourcePickerProps {
   selectedHandle?: FileSystemDirectoryHandle
   handleSelect: () => void
-  selectableItems: (FileSystemDirectoryHandle | FileSystemFileHandle)[]
+  selectableItems: (FileEntry | DirectoryEntry)[]
   onItemSelect: (selectedItems: Set<string>) => void
   selects: Set<string>
   disabled: boolean
-  afterItemRender?: (item: FileSystemDirectoryHandle | FileSystemFileHandle) => React.ReactNode
+  afterItemRender?: (item: FileEntry | DirectoryEntry) => React.ReactNode
 }
 
 export default function ResourcePicker(props: ResourcePickerProps) {
@@ -48,7 +49,7 @@ export default function ResourcePicker(props: ResourcePickerProps) {
         <div className="w-full flex flex-col gap-2">
           {selectableItems.length === 0 ? (
             <div onClick={onWorkspaceSelect} className="text-gray-500 text-md py-10 text-center cursor-pointer">
-              <p>No items available and click re-choose</p>
+              <p>No items available. Click to select another directory</p>
             </div>
           ) : (
             <>
@@ -57,11 +58,11 @@ export default function ResourcePicker(props: ResourcePickerProps) {
                 <span>Select All</span>
               </label>
 
-              <div className="flex flex-col gap-2 max-h-[40vh] overflow-y-auto">
+              <div className="flex flex-col gap-2 max-h-[40vh]">
                 {selectableItems.map((item) => (
                   <label className="flex items-center gap-2 px-4 bg-gray-100 text-black p-2 rounded" key={item.name}>
                     <input type="checkbox" checked={selects.has(item.name)} onChange={() => handleSelect(item.name)} disabled={disabled} />
-                    <span className="whitespace-nowrap overflow-hidden text-ellipsis">{item.kind === 'directory' ? `/${item.name}` : item.name}</span>
+                    <span className="whitespace-nowrap overflow-hidden text-ellipsis">{item.name}</span>
                     <div className="ml-auto inline-flex gap-1">{afterItemRender ? afterItemRender(item) : null}</div>
                   </label>
                 ))}

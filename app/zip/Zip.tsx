@@ -10,6 +10,7 @@ import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import FileProgressBar from '@/components/FileProgressBar'
 import PageLoading from '@/components/PageLoading'
 import { EXCLUDES_FILES } from './constants'
+import { isDirectoryEntry } from '@/services/file/types'
 
 export default function Zip() {
   const [ready, setReady] = useState(false)
@@ -33,12 +34,12 @@ export default function Zip() {
       const totalFolders = selectedFolders.size
       let processedFolders = 0
 
-      for await (const itemHandle of availableItems) {
-        if (!selectedFolders.has(itemHandle.name)) {
+      for await (const itemEntry of availableItems) {
+        if (!selectedFolders.has(itemEntry.name)) {
           continue
         }
 
-        const itemName = itemHandle.name
+        const itemName = itemEntry.name
         setCurrentFolder(itemName)
 
         const zipOptions: ZipWriterConstructorOptions = {}
@@ -47,18 +48,18 @@ export default function Zip() {
         }
 
         let files = []
-        if (itemHandle.kind === 'directory') {
-          const fileEntries = await globFiles(itemHandle)
+        if (isDirectoryEntry(itemEntry)) {
+          const fileEntries = await globFiles(itemEntry.handle)
           for (const fileEntry of fileEntries) {
             files.push(fileEntry.handle)
           }
         } else {
-          files.push(itemHandle)
+          files.push(itemEntry.handle)
         }
 
         const totalFiles = files.length
         if (totalFiles === 0) {
-          alertRef.current?.show(`File ${itemHandle.name} is empty and will be skipped.`, { type: 'warn' })
+          alertRef.current?.show(`File ${itemEntry.name} is empty and will be skipped.`, { type: 'warn' })
           continue
         }
 

@@ -63,12 +63,12 @@ export default function PDFTextExtractor() {
   const handleExtractText = async () => {
     setIsExtracting(true)
 
-    for await (const fileHandle of availableItems) {
-      if (fileHandle.kind !== 'file') {
+    for await (const fileEntry of availableItems) {
+      if (fileEntry.kind !== 'file') {
         continue
       }
 
-      const file = fileHandle.name
+      const file = fileEntry.name
       if (invoices.some((invoice) => invoice.file === file)) {
         continue
       }
@@ -79,7 +79,7 @@ export default function PDFTextExtractor() {
 
       setInvoices((prevInvoices) => [...prevInvoices, { file, loading: true }])
 
-      const text = await extractTextFromPDF(fileHandle)
+      const text = await extractTextFromPDF(fileEntry.handle)
       if (text) {
         const invoice = extractInvoice(text)
         setInvoices((prevInvoices) => prevInvoices.map((inv) => (inv.file === file ? { ...invoice, file, loading: false } : inv)))
@@ -132,13 +132,13 @@ export default function PDFTextExtractor() {
     async () => {
       const targetDirectory = await showDirectoryPicker()
       for (const invoice of usedInvoices) {
-        const fileHandle = availableItems.find((item) => item.name === invoice.file)
-        if (!(fileHandle && fileHandle.kind === 'file')) {
+        const fileEntry = availableItems.find((item) => item.name === invoice.file)
+        if (!(fileEntry && fileEntry.kind === 'file')) {
           continue
         }
 
         try {
-          const file = await fileHandle.getFile()
+          const file = await fileEntry.handle.getFile()
           const newFileHandle = await targetDirectory.getFileHandle(file.name, { create: true })
           const writable = await newFileHandle.createWritable()
           await writable.write(file)

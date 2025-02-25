@@ -82,6 +82,8 @@ export async function writeFileToDirectory(name: string, content: FileContent, o
   } catch {
     throw new Error(`Write file ${name} fail`)
   }
+
+  return fileHandle
 }
 
 export interface CreateDirectoryAndWriteFileOptions extends WriteFileOptions {
@@ -95,12 +97,17 @@ export async function createDirectoryAndWriteFile(directoryName: string, files: 
   }
 
   const newDirectoryHandle = await getOrCreateDirectoryHandle(directoryHandle, directoryName)
+  const handles: FileSystemFileHandle[] = []
   for await (const { name, content } of files) {
-    await writeFileToDirectory(name, content, {
+    const fileHandle = await writeFileToDirectory(name, content, {
       ...options,
       directoryHandle: newDirectoryHandle,
     })
+
+    handles.push(fileHandle)
   }
+
+  return handles
 }
 
 async function getOrCreateDirectoryHandle(directoryHandle: FileSystemDirectoryHandle, path: string): Promise<FileSystemDirectoryHandle> {

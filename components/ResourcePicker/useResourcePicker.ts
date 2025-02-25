@@ -1,6 +1,7 @@
 import { globFiles } from '@/services/file/reader'
-import { useInterval } from 'ahooks'
-import { useState } from 'react'
+import { useInterval, useDebounceFn } from 'ahooks'
+import { useState, useCallback } from 'react'
+import type { FileEntry, DirectoryEntry } from '@/services/file/types'
 
 interface UseResourcePickerOptions {
   only?: 'file' | 'directory'
@@ -12,28 +13,58 @@ interface UseResourcePickerOptions {
 export default function useResourcePicker(options: UseResourcePickerOptions) {
   const { fileTypes, only, deep } = options || {}
   const [selectedHandle, setSelectedHandle] = useState<FileSystemDirectoryHandle>()
-  const [selectableItems, setSelectableItems] = useState<(FileSystemDirectoryHandle | FileSystemFileHandle)[]>([])
+  const [selectableItems, setSelectableItems] = useState<(FileEntry | DirectoryEntry)[]>([])
   const [selects, setSelects] = useState<Set<string>>(new Set())
 
-  const syncWorkspace = async (handle: FileSystemDirectoryHandle) => {
-    const directories = []
-    const files = []
+  const syncWorkspace = useCallback(
+    async (directoryHandle: FileSystemDirectoryHandle) => {
+      const directories: DirectoryEntry[] = []
+      const files: FileEntry[] = []
 
-    const entries = deep ? (await globFiles(handle)).map(({ handle }) => handle) : handle.values()
-    for await (const entry of entries) {
-      if (only !== 'file' && entry.kind === 'directory') {
-        directories.push(entry)
-      } else if (only !== 'directory' && entry.kind === 'file') {
-        const extname = entry.name.split('.').pop()!
-        if (!fileTypes || fileTypes.includes(extname)) {
-          files.push(entry)
+      if (deep) {
+        for (const entry of await globFiles(directoryHandle)) {
+          const extname = entry.name.split('.').pop()!
+          if (!fileTypes || fileTypes.includes(extname)) {
+            files.push(entry)
+          }
+        }
+      } else {
+        for await (const handle of directoryHandle.values()) {
+          const name = handle.name
+          if (only !== 'file' && handle.kind === 'directory') {
+            directories.push({ kind: 'directory', name, handle, files: [] })
+            continue
+          }
+
+          if (only !== 'directory' && handle.kind === 'file') {
+            const extname = name.split('.').pop()!
+            if (!fileTypes || fileTypes.includes(extname)) {
+              files.push({ kind: 'file', name, handle })
+            }
+
+            continue
+          }
         }
       }
-    }
 
-    const sortedItems = [...directories, ...files].sort((a, b) => a.name.localeCompare(b.name))
-    setSelectableItems(sortedItems)
-  }
+      const sortedItems = [...directories, ...files].sort((a, b) => a.name.localeCompare(b.name))
+
+      // Compare old and new file lists, only update state when there are changes
+      const hasChanges = selectableItems.length !== sortedItems.length || selectableItems.some((item, index) => item.name !== sortedItems[index]?.name)
+
+      if (hasChanges) {
+        setSelectableItems(sortedItems)
+      }
+    },
+    [deep, fileTypes, only, selectableItems]
+  )
+
+  const { run: debouncedSync } = useDebounceFn(
+    (directoryHandle: FileSystemDirectoryHandle) => {
+      syncWorkspace(directoryHandle)
+    },
+    { wait: 300 }
+  )
 
   const handleSelect = async () => {
     const directoryHandle = await showDirectoryPicker()
@@ -41,7 +72,9 @@ export default function useResourcePicker(options: UseResourcePickerOptions) {
     syncWorkspace(directoryHandle)
   }
 
-  useInterval(() => selectedHandle && syncWorkspace(selectedHandle), 1e3)
+  useInterval(() => {
+    selectedHandle && debouncedSync(selectedHandle)
+  }, 1e3)
 
   return {
     selected: !!selectedHandle,

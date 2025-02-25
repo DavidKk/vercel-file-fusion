@@ -32,17 +32,15 @@ export async function readdir(directoryHandle?: FileSystemDirectoryHandle): Prom
 
 export async function globFiles(directoryHandle: FileSystemDirectoryHandle): Promise<FileEntry[]> {
   const files: FileEntry[] = []
-
-  async function readDirectory(handle: FileSystemDirectoryHandle) {
+  const readDirectory = async (handle: FileSystemDirectoryHandle, parentPath: string[] = []) => {
     for await (const entry of handle.values()) {
       if (entry.kind === 'file') {
-        const path = [handle.name, entry.name].join('/')
-        files.push({ kind: 'file', name: path, handle: entry })
+        files.push({ kind: 'file', name: [...parentPath, entry.name].join('/'), handle: entry })
         continue
       }
 
       if (entry.kind === 'directory') {
-        await readDirectory(entry)
+        await readDirectory(entry, [...parentPath, entry.name])
         continue
       }
     }
