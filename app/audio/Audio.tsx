@@ -72,7 +72,7 @@ export default function Audio() {
           const arrayBuffer = await readFileToArrayBuffer(itemEntry.handle)
           const content = embedFlacMetadata(arrayBuffer, { ...metadata, LYRICS, cover, coverMetadata })
 
-          await writeFileToDirectory(itemName, content, {
+          await writeFileToDirectory(basename(itemName), content, {
             directoryHandle: outputDirHandle,
             onProgress(progress, total) {
               const writeProgress = (progress / total) * 100
