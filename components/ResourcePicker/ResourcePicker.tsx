@@ -7,10 +7,11 @@ export interface ResourcePickerProps {
   onItemSelect: (selectedItems: Set<string>) => void
   selects: Set<string>
   disabled: boolean
+  afterItemRender?: (item: FileSystemDirectoryHandle | FileSystemFileHandle) => React.ReactNode
 }
 
 export default function ResourcePicker(props: ResourcePickerProps) {
-  const { selectedHandle, handleSelect: onWorkspaceSelect, selectableItems, onItemSelect, selects, disabled } = props
+  const { selectedHandle, handleSelect: onWorkspaceSelect, selectableItems, onItemSelect, selects, disabled, afterItemRender } = props
   const [allSelected, setAllSelected] = useState(false)
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,7 +61,8 @@ export default function ResourcePicker(props: ResourcePickerProps) {
                 {selectableItems.map((item) => (
                   <label className="flex items-center gap-2 px-4 bg-gray-100 text-black p-2 rounded" key={item.name}>
                     <input type="checkbox" checked={selects.has(item.name)} onChange={() => handleSelect(item.name)} disabled={disabled} />
-                    <span>{item.kind === 'directory' ? `/${item.name}` : item.name}</span>
+                    <span className="whitespace-nowrap overflow-hidden text-ellipsis">{item.kind === 'directory' ? `/${item.name}` : item.name}</span>
+                    <div className="ml-auto inline-flex gap-1">{afterItemRender ? afterItemRender(item) : null}</div>
                   </label>
                 ))}
               </div>

@@ -1,9 +1,9 @@
-export function showOpenFilePicker() {
+export function showOpenFilePicker(options?: OpenFilePickerOptions & { multiple?: false | undefined }) {
   if (!('showOpenFilePicker' in window)) {
     throw new Error('showOpenFilePicker is not supported in this browser.')
   }
 
-  return window.showOpenFilePicker()
+  return window.showOpenFilePicker(options)
 }
 
 export function showDirectoryPicker(options?: DirectoryPickerOptions) {
