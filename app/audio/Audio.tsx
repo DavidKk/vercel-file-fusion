@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRequest } from 'ahooks'
-import { parseBlob } from 'music-metadata'
 import { showOpenFilePicker, showDirectoryPicker } from '@/services/file/common'
 import { globFiles, readFile, readFileToArrayBuffer } from '@/services/file/reader'
 import { createDirectoryAndWriteFile, writeFileToDirectory } from '@/services/file/writer'
@@ -15,8 +14,8 @@ import PageLoading from '@/components/PageLoading'
 import FileProgressBar from '@/components/FileProgressBar'
 import FeatherIcon from 'feather-icons-react'
 import { basename } from '@/services/file/path'
+import { fuzzyMatchFileName } from '@/services/file/fuzzyMatch'
 import { COVER_EXTNAME, LYRICS_EXTNAME, METADATA_EXTNAME } from './constants'
-import { Flac } from '@/services/flac/Flac'
 
 interface FileCache {
   cover?: { handle: FileSystemFileHandle; entry: { name: string } }
@@ -129,9 +128,9 @@ export default function Audio() {
         const possibleLyrics = LYRICS_EXTNAME.map((extname) => `${name}${extname}`)
         const possibleMetadata = METADATA_EXTNAME.map((extname) => `${name}${extname}`)
 
-        const coverEntry = entries.find((entry) => possibleCovers.includes(basename(entry.name)))
-        const lyricsEntry = entries.find((entry) => possibleLyrics.includes(basename(entry.name)))
-        const metadataEntry = entries.find((entry) => possibleMetadata.includes(basename(entry.name)))
+        const coverEntry = entries.find((entry) => possibleCovers.some((cover) => fuzzyMatchFileName(cover, entry.name)))
+        const lyricsEntry = entries.find((entry) => possibleLyrics.some((lyric) => fuzzyMatchFileName(lyric, entry.name)))
+        const metadataEntry = entries.find((entry) => possibleMetadata.some((metadata) => fuzzyMatchFileName(metadata, entry.name)))
 
         newCache[itemName] = {
           cover: coverEntry ? { handle: coverEntry.handle, entry: coverEntry } : undefined,

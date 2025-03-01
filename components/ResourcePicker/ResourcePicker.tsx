@@ -58,7 +58,7 @@ export default function ResourcePicker(props: ResourcePickerProps) {
                 <span>Select All</span>
               </label>
 
-              <div className="flex flex-col gap-2 max-h-[40vh]">
+              <div className="flex flex-col gap-2 max-h-[40vh] overflow-y-auto">
                 {selectableItems.map((item) => (
                   <label className="flex items-center gap-2 px-4 bg-gray-100 text-black p-2 rounded" key={item.name}>
                     <input type="checkbox" checked={selects.has(item.name)} onChange={() => handleSelect(item.name)} disabled={disabled} />

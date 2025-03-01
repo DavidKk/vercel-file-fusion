@@ -1,4 +1,4 @@
-import { sanitizeFileName } from '../../utils/file'
+import { sanitizeFileName } from '@/services/file/name'
 
 describe('sanitizeFileName', () => {
   it('should trim whitespace', () => {

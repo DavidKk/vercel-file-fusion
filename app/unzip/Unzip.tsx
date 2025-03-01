@@ -6,11 +6,11 @@ import { BlobReader, ERR_ENCRYPTED, ERR_INVALID_PASSWORD, Uint8ArrayWriter, ZipR
 import type { FileContent } from '@/services/file/types'
 import { transcodeEntryFileName } from '@/services/zip/decode'
 import { writeFileToDirectory } from '@/services/file/writer'
+import { sanitizeFileName } from '@/services/file/name'
 import Picker from '@/components/Picker'
 import FileProgressBar from '@/components/FileProgressBar'
 import PageLoading from '@/components/PageLoading'
 import { Spinner } from '@/components/Spinner'
-import { sanitizeFileName } from '@/utils/file'
 
 type ViewMode = 'all' | 'error'
 
