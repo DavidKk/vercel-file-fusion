@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRequest } from 'ahooks'
 import { showOpenFilePicker, showDirectoryPicker } from '@/services/file/common'
 import { globFiles, readFile, readFileToArrayBuffer } from '@/services/file/reader'
@@ -8,7 +8,6 @@ import { createDirectoryAndWriteFile, writeFileToDirectory } from '@/services/fi
 import { embedFlacMetadata } from '@/services/flac'
 import { getImageMimeType } from '@/services/image/getImageMimeType'
 import { getImageSize } from '@/services/image/getImageSize'
-import Alert, { type AlertImperativeHandler } from '@/components/Alert'
 import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import PageLoading from '@/components/PageLoading'
 import FileProgressBar from '@/components/FileProgressBar'
@@ -23,18 +22,34 @@ interface FileCache {
   metadata?: { handle: FileSystemFileHandle; entry: { name: string } }
 }
 
+type AudioResult = {
+  file: string
+  success?: boolean
+  error?: string
+  loading?: boolean
+}
+
 export default function Audio() {
   const [ready, setReady] = useState(false)
   const [currentFile, setCurrentFile] = useState('')
   const [totalProgress, setTotalProgress] = useState(0)
   const [fileCache, setFileCache] = useState<Record<string, FileCache>>({})
-  const alertRef = useRef<AlertImperativeHandler>(null)
+  const [audioResults, setAudioResults] = useState<AudioResult[]>([])
+  const [viewMode, setViewMode] = useState<'all' | 'error'>('all')
+
+  const filteredResults = useMemo(() => {
+    if (viewMode === 'error') {
+      return audioResults.filter((result) => !result.success)
+    }
+    return audioResults
+  }, [audioResults, viewMode])
 
   const workspaceContext = useResourcePicker({ fileTypes: ['flac'], only: 'file', deep: true })
   const { selectedHandle: workspaceHandle, selected: isWorkspaceSelected, selects: selectedFiles, selectableItems: availableItems, setSelects: setSelectedFiles } = workspaceContext
 
   const { run: startEmbedding, loading } = useRequest(
     async () => {
+      setAudioResults([])
       const outputDirHandle = await showDirectoryPicker()
       const totalFiles = selectedFiles.size
       let processedFiles = 0
@@ -45,6 +60,8 @@ export default function Audio() {
         const itemName = itemEntry.name
         setCurrentFile(itemName)
         const cache = fileCache[itemName]
+
+        setAudioResults((prev) => [...prev, { file: itemName, loading: true }])
 
         try {
           const cover = cache?.cover ? await readFileToArrayBuffer(cache.cover.handle) : undefined
@@ -59,6 +76,7 @@ export default function Audio() {
             } catch (error) {
               // eslint-disable-next-line no-console
               console.error('Failed to parse metadata file:', error)
+              throw new Error('Failed to parse metadata file')
             }
           })()
 
@@ -73,7 +91,13 @@ export default function Audio() {
               setTotalProgress(totalProgress)
             },
           })
+
+          setAudioResults((prev) => prev.map((result) => (result.file === itemName ? { ...result, success: true, loading: false } : result)))
         } catch (error) {
+          setAudioResults((prev) =>
+            prev.map((result) => (result.file === itemName ? { ...result, success: false, loading: false, error: error instanceof Error ? error.message : '未知错误' } : result))
+          )
+
           // eslint-disable-next-line no-console
           console.error(error)
         }
@@ -94,7 +118,6 @@ export default function Audio() {
         console.error(error)
 
         setTotalProgress(0)
-        alertRef.current?.show(error.message, { type: 'error' })
       },
       onFinally: () => {
         setCurrentFile('')
@@ -188,7 +211,8 @@ export default function Audio() {
       }))
     } catch (error) {
       if (error instanceof Error && error.name !== 'AbortError') {
-        alertRef.current?.show(error.message, { type: 'error' })
+        // eslint-disable-next-line no-console
+        console.error(error.message)
       }
     }
   }
@@ -244,10 +268,77 @@ export default function Audio() {
         </button>
       )}
 
-      <div className="w-full h-10 flex flex-col gap-4">
-        <Alert ref={alertRef} />
-        {totalProgress > 0 && <FileProgressBar progress={totalProgress} message={totalProgress >= 100 ? 'Finish' : `Processing ${currentFile}`} />}
-      </div>
+      {(audioResults.length > 0 || totalProgress > 0) && (
+        <div className="mt-4 w-full border rounded-md overflow-hidden">
+          <div className="bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 flex items-center justify-between">
+            <span>处理结果</span>
+            <div className="flex rounded-md overflow-hidden border border-gray-300">
+              <button
+                className={`px-3 py-1 text-xs ${viewMode === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                onClick={() => setViewMode('all')}
+              >
+                All
+              </button>
+              <button
+                className={`px-3 py-1 text-xs border-l ${viewMode === 'error' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                onClick={() => setViewMode('error')}
+              >
+                Fails
+              </button>
+            </div>
+          </div>
+
+          {totalProgress > 0 && (
+            <div className="border-b border-gray-200">
+              <FileProgressBar
+                bgClassName="rounded-none"
+                barClassName="rounded-none"
+                noText={true}
+                progress={totalProgress}
+                message={totalProgress >= 100 ? 'Finish' : `Processing ${currentFile}`}
+              />
+            </div>
+          )}
+
+          <div
+            className="divide-y divide-gray-200 max-h-[300px] overflow-y-auto"
+            ref={(el: HTMLDivElement) => {
+              if (!el) {
+                return
+              }
+
+              el.scrollTop = el.scrollHeight
+            }}
+          >
+            {filteredResults.map((result, index) => (
+              <div key={index} className="px-4 py-3 flex items-center">
+                <div className="flex items-center gap-2">
+                  {result.loading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-indigo-500 border-t-transparent" />
+                  ) : result.success ? (
+                    <span className="text-green-500">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                  ) : (
+                    <span className="text-red-500">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </span>
+                  )}
+
+                  <div className="column grow flex flex-col">
+                    <span className="text-sm text-gray-900 truncate max-w-[400px]">{result.file}</span>
+                    {!result.success && <span className="text-sm text-red-500">{result.error}</span>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

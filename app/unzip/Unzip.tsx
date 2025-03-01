@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRequest } from 'ahooks'
 import { BlobReader, ERR_ENCRYPTED, ERR_INVALID_PASSWORD, Uint8ArrayWriter, ZipReader, type ZipReaderConstructorOptions } from '@zip.js/zip.js'
 import type { FileContent } from '@/services/file/types'
@@ -38,14 +38,6 @@ export default function Unzip() {
 
     return unzipResults
   }, [unzipResults, viewMode])
-
-  const scrollBottom = useCallback((el: HTMLDivElement) => {
-    if (!el) {
-      return
-    }
-
-    el.scrollTop = el.scrollHeight
-  }, [])
 
   const { run: startUnzip } = useRequest(
     async () => {
@@ -214,7 +206,7 @@ export default function Unzip() {
                 className={`px-3 py-1 text-xs border-l ${viewMode === 'error' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
                 onClick={() => setViewMode('error')}
               >
-                Errors
+                Fails
               </button>
             </div>
           </div>
@@ -231,7 +223,16 @@ export default function Unzip() {
             </div>
           )}
 
-          <div className="divide-y divide-gray-200 max-h-[300px] overflow-y-auto" ref={scrollBottom}>
+          <div
+            className="divide-y divide-gray-200 max-h-[300px] overflow-y-auto"
+            ref={(el: HTMLDivElement) => {
+              if (!el) {
+                return
+              }
+
+              el.scrollTop = el.scrollHeight
+            }}
+          >
             {filteredResults.map((result, index) => (
               <div key={index} className="px-4 py-3 flex items-center">
                 <div className="flex items-center gap-2">

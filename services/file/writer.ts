@@ -6,6 +6,9 @@ export interface WritableFile {
   content: FileContent
 }
 
+/**
+ * Checks if the directory handle has write permission
+ */
 export async function isWriteableDirectoryHandle(handle: FileSystemDirectoryHandle) {
   let state = await handle.queryPermission({ mode: 'readwrite' })
   if (state === 'prompt') {
@@ -16,12 +19,24 @@ export async function isWriteableDirectoryHandle(handle: FileSystemDirectoryHand
 }
 
 export interface WriteFileOptions {
+  /**
+   * The size of each chunk when writing large files (in bytes).
+   * Default is 8MB (8 * 1024 * 1024 bytes), which provides:
+   * - Optimal memory usage: Prevents excessive memory consumption
+   * - Browser compatibility: Works well across different browsers
+   * - File system performance: Balances write speed and system load
+   * - Progress feedback: Reasonable frequency for progress updates
+   * - Error handling: Manageable chunk size for retry operations
+   */
   chunkSize?: number
   onProgress?: (progress: number, total: number) => void
 }
 
+/**
+ * Writes content to a file with optional progress tracking and chunked writing
+ */
 export async function writeFile(fileHandle: FileSystemFileHandle, content: FileContent, options: WriteFileOptions = {}) {
-  const { chunkSize = 64 * 1024, onProgress } = options || {}
+  const { chunkSize = 8 * 1024 * 1024, onProgress } = options || {}
   const writable = await fileHandle.createWritable()
 
   if (onProgress) {
@@ -53,6 +68,9 @@ export async function writeFile(fileHandle: FileSystemFileHandle, content: FileC
 
 export interface CreateFileAndWriteFileOptions extends WriteFileOptions {}
 
+/**
+ * Creates a new file using system file picker and writes content to it
+ */
 export async function createFileAndWriteFile(content: FileContent, options?: CreateFileAndWriteFileOptions) {
   if (!('showSaveFilePicker' in window)) {
     throw new Error('showSaveFilePicker is not supported in this browser.')
@@ -66,6 +84,9 @@ export interface WriteFileToDirectoryOptions extends WriteFileOptions {
   directoryHandle?: FileSystemDirectoryHandle
 }
 
+/**
+ * Writes content to a file in the specified directory, creating the directory structure if needed
+ */
 export async function writeFileToDirectory(name: string, content: FileContent, options?: WriteFileToDirectoryOptions) {
   const { directoryHandle = await showDirectoryPicker({ mode: 'readwrite' }) } = options || {}
   if (!(await isWriteableDirectoryHandle(directoryHandle))) {
@@ -90,6 +111,9 @@ export interface CreateDirectoryAndWriteFileOptions extends WriteFileOptions {
   directoryHandle?: FileSystemDirectoryHandle
 }
 
+/**
+ * Creates a new directory and writes multiple files to it
+ */
 export async function createDirectoryAndWriteFile(directoryName: string, files: WritableFile[], options?: CreateDirectoryAndWriteFileOptions) {
   const { directoryHandle = await showDirectoryPicker({ mode: 'readwrite' }) } = options || {}
   if (!(await isWriteableDirectoryHandle(directoryHandle))) {
@@ -110,6 +134,9 @@ export async function createDirectoryAndWriteFile(directoryName: string, files: 
   return handles
 }
 
+/**
+ * Creates or retrieves directory handles for each segment of the provided path
+ */
 async function getOrCreateDirectoryHandle(directoryHandle: FileSystemDirectoryHandle, path: string): Promise<FileSystemDirectoryHandle> {
   if (!path) {
     return directoryHandle
