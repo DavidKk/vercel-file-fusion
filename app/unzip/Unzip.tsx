@@ -161,6 +161,89 @@ export default function Unzip() {
     return <PageLoading />
   }
 
+  const renderResultHeader = () => {
+    return (
+      <div className="bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 flex items-center justify-between">
+        <span>Results</span>
+        <div className="flex rounded-md overflow-hidden border border-gray-300">
+          <button className={`px-3 py-1 text-xs ${viewMode === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} onClick={() => setViewMode('all')}>
+            All
+          </button>
+          <button
+            className={`px-3 py-1 text-xs border-l ${viewMode === 'error' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+            onClick={() => setViewMode('error')}
+          >
+            Fails
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const renderResultProgress = () => {
+    if (totalProgress === 0) {
+      return null
+    }
+
+    return (
+      <div className="border-b border-gray-200">
+        <FileProgressBar
+          bgClassName="rounded-none"
+          barClassName="rounded-none"
+          noText={true}
+          progress={totalProgress}
+          message={totalProgress >= 100 ? 'Finish' : `${currentZip}: extracting ${currentFile}`}
+        />
+      </div>
+    )
+  }
+
+  const renderResultBody = () => {
+    if (!filteredResults?.length) {
+      return <div className="px-4 py-3 text-center text-gray-500">No Data</div>
+    }
+
+    return (
+      <div
+        className="divide-y divide-gray-200 max-h-[300px] overflow-y-auto"
+        ref={(el: HTMLDivElement) => {
+          if (!el) {
+            return
+          }
+
+          el.scrollTop = el.scrollHeight
+        }}
+      >
+        {filteredResults.map((result, index) => (
+          <div key={index} className="px-4 py-3 flex items-center">
+            <div className="flex items-center gap-2">
+              {result.loading ? (
+                <Spinner color="text-indigo-500" />
+              ) : result.success ? (
+                <span className="text-green-500">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+              ) : (
+                <span className="text-red-500">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </span>
+              )}
+
+              <div className="column grow flex flex-col">
+                <span className="text-sm text-gray-900 truncate max-w-[400px]">{result.file}</span>
+                {!result.success && <span className="text-sm text-red-500">{result.error}</span>}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <input
@@ -193,73 +276,9 @@ export default function Unzip() {
 
       {(unzipResults.length > 0 || totalProgress > 0) && (
         <div className="mt-4 w-full border rounded-md overflow-hidden">
-          <div className="bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 flex items-center justify-between">
-            <span>Extraction Results</span>
-            <div className="flex rounded-md overflow-hidden border border-gray-300">
-              <button
-                className={`px-3 py-1 text-xs ${viewMode === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                onClick={() => setViewMode('all')}
-              >
-                All
-              </button>
-              <button
-                className={`px-3 py-1 text-xs border-l ${viewMode === 'error' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                onClick={() => setViewMode('error')}
-              >
-                Fails
-              </button>
-            </div>
-          </div>
-
-          {totalProgress > 0 && (
-            <div className="border-b border-gray-200">
-              <FileProgressBar
-                bgClassName="rounded-none"
-                barClassName="rounded-none"
-                noText={true}
-                progress={totalProgress}
-                message={totalProgress >= 100 ? 'Finish' : `${currentZip}: extracting ${currentFile}`}
-              />
-            </div>
-          )}
-
-          <div
-            className="divide-y divide-gray-200 max-h-[300px] overflow-y-auto"
-            ref={(el: HTMLDivElement) => {
-              if (!el) {
-                return
-              }
-
-              el.scrollTop = el.scrollHeight
-            }}
-          >
-            {filteredResults.map((result, index) => (
-              <div key={index} className="px-4 py-3 flex items-center">
-                <div className="flex items-center gap-2">
-                  {result.loading ? (
-                    <Spinner color="text-indigo-500" />
-                  ) : result.success ? (
-                    <span className="text-green-500">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </span>
-                  ) : (
-                    <span className="text-red-500">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </span>
-                  )}
-
-                  <div className="column grow flex flex-col">
-                    <span className="text-sm text-gray-900 truncate max-w-[400px]">{result.file}</span>
-                    {!result.success && <span className="text-sm text-red-500">{result.error}</span>}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          {renderResultHeader()}
+          {renderResultProgress()}
+          {renderResultBody()}
         </div>
       )}
     </div>
