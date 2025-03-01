@@ -1,21 +1,21 @@
 import { FlacMetadata } from './FlacMetadata'
-import { bufferFromVorbisComments, parseVorbisComments } from './share'
+import { encodeVorbisComments, decodeVorbisComments } from './vorbis-comments'
 
-export class FlacVorbis extends FlacMetadata {
-  static TYPE = 4
+export class FlacVorbisComments extends FlacMetadata {
+  static readonly TYPE = 4
 
   protected vendor = ''
   protected comments = new Map<string, string>()
 
   public get content() {
-    return bufferFromVorbisComments(this.comments, this.vendor)
+    return encodeVorbisComments(this.vendor, this.comments)
   }
 
-  constructor(byte: number = FlacVorbis.TYPE, data?: ArrayBuffer) {
+  constructor(byte: number = FlacVorbisComments.TYPE, data?: ArrayBuffer) {
     super(byte, new ArrayBuffer(0))
 
     if (data) {
-      const { vendor, comments } = parseVorbisComments(data)
+      const { vendor, comments } = decodeVorbisComments(data)
       this.vendor = vendor
       this.comments = comments
     }

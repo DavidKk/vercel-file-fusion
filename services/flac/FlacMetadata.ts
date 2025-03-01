@@ -2,17 +2,21 @@
  * @see https://www.rfc-editor.org/rfc/rfc9639.html#appendix-D.1.3
  */
 export class FlacMetadata {
-  static MAX_BLOCK_SIZE = (1 << 24) - 1
+  static readonly MAX_BLOCK_SIZE = (1 << 24) - 1
 
   protected byte: number
   protected _content: ArrayBuffer
 
-  public set content(data: ArrayBuffer) {
-    this._content = data
+  public get type() {
+    return this.byte
   }
 
   public get content() {
     return this._content
+  }
+
+  public set content(data: ArrayBuffer) {
+    this._content = data
   }
 
   public get size() {
@@ -20,7 +24,7 @@ export class FlacMetadata {
   }
 
   public get isLast() {
-    return this.byte & 0x80
+    return (this.byte & 0x80) !== 0
   }
 
   constructor(byte: number, data: ArrayBuffer) {
@@ -30,7 +34,7 @@ export class FlacMetadata {
 
   public setContent(data: ArrayBuffer) {
     if (data.byteLength > FlacMetadata.MAX_BLOCK_SIZE) {
-      throw new Error('Cover image too large')
+      throw new Error('metadata is too large')
     }
 
     this._content = data

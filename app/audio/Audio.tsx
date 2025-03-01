@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRequest } from 'ahooks'
+import { parseBlob } from 'music-metadata'
 import { showOpenFilePicker, showDirectoryPicker } from '@/services/file/common'
 import { globFiles, readFile, readFileToArrayBuffer } from '@/services/file/reader'
 import { createDirectoryAndWriteFile, writeFileToDirectory } from '@/services/file/writer'
@@ -12,9 +13,10 @@ import Alert, { type AlertImperativeHandler } from '@/components/Alert'
 import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import PageLoading from '@/components/PageLoading'
 import FileProgressBar from '@/components/FileProgressBar'
-import { COVER_EXTNAME, LYRICS_EXTNAME, METADATA_EXTNAME } from './constants'
 import FeatherIcon from 'feather-icons-react'
 import { basename } from '@/services/file/path'
+import { COVER_EXTNAME, LYRICS_EXTNAME, METADATA_EXTNAME } from './constants'
+import { Flac } from '@/services/flac/Flac'
 
 interface FileCache {
   cover?: { handle: FileSystemFileHandle; entry: { name: string } }
@@ -48,29 +50,21 @@ export default function Audio() {
         try {
           const cover = cache?.cover ? await readFileToArrayBuffer(cache.cover.handle) : undefined
           const format = cache?.cover ? getImageMimeType(cache.cover.entry.name) : undefined
-          const coverSize = cover && format ? await getImageSize(cover, format) : {}
+          const coverSize = cover && format ? await getImageSize(cover, format) : undefined
           const coverMetadata = { ...coverSize, format }
-          const LYRICS = cache?.lyrics ? await readFile(cache.lyrics.handle) : undefined
+          const lyrics = cache?.lyrics ? await readFile(cache.lyrics.handle) : undefined
           const metadataContent = cache?.metadata ? await readFile(cache.metadata.handle) : '{}'
-          const metadata = Object.fromEntries(
-            (function* () {
-              try {
-                const data = JSON.parse(metadataContent)
-                for (const [key, value] of Object.entries(data)) {
-                  const name = key.toLocaleUpperCase()
-                  if (typeof value === 'number' || typeof value === 'string') {
-                    yield [name, value]
-                  }
-                }
-              } catch (error) {
-                // eslint-disable-next-line no-console
-                console.error('Failed to parse metadata file:', error)
-              }
-            })()
-          )
+          const metadata = (() => {
+            try {
+              return JSON.parse(metadataContent)
+            } catch (error) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to parse metadata file:', error)
+            }
+          })()
 
           const arrayBuffer = await readFileToArrayBuffer(itemEntry.handle)
-          const content = embedFlacMetadata(arrayBuffer, { ...metadata, LYRICS, cover, coverMetadata })
+          const content = embedFlacMetadata(arrayBuffer, { ...metadata, lyrics, cover, coverMetadata })
 
           await writeFileToDirectory(basename(itemName), content, {
             directoryHandle: outputDirHandle,
