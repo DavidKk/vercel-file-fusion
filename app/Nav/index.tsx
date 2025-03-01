@@ -40,7 +40,7 @@ export function Nav(props: NavProps) {
           ))}
         </div>
 
-        <a className="ml-auto" href="https://github.com/DavidKk/vercel-web-scripts" target="_blank" rel="noreferrer">
+        <a className="ml-auto" href="https://github.com/DavidKk/vercel-file-fusion" target="_blank" rel="noreferrer">
           <FeatherIcon icon="github" />
         </a>
       </div>
