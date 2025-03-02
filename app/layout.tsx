@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Analytics } from '@vercel/analytics/react'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Nav } from './Nav'
 import './globals.css'
@@ -18,13 +19,16 @@ export const metadata: Metadata = {
   description: 'local file utilities from browser',
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
+interface RootLayoutProps {
   children: React.ReactNode
-}>) {
+}
+
+export default function RootLayout(props: Readonly<RootLayoutProps>) {
+  const { children } = props
+
   return (
     <html lang="en">
+      <Analytics />
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Nav />
         {children}
