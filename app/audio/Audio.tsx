@@ -72,7 +72,9 @@ export default function Audio() {
           const metadataContent = cache?.metadata ? await readFile(cache.metadata.handle) : '{}'
           const metadata = (() => {
             try {
-              return JSON.parse(metadataContent)
+              const metadata = JSON.parse(metadataContent)
+              const { artist, album } = metadata
+              return { artist, album }
             } catch (error) {
               // eslint-disable-next-line no-console
               console.error('Failed to parse metadata file:', error)
@@ -82,7 +84,6 @@ export default function Audio() {
 
           const arrayBuffer = await readFileToArrayBuffer(itemEntry.handle)
           const content = embedFlacMetadata(arrayBuffer, { ...metadata, lyrics, cover, coverMetadata })
-
           await writeFileToDirectory(basename(itemName), content, {
             directoryHandle: outputDirHandle,
             onProgress(progress, total) {
