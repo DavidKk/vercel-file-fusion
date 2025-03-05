@@ -30,7 +30,6 @@ export default function RootLayout(props: Readonly<RootLayoutProps>) {
   return (
     <html lang="en">
       <Analytics />
-
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         <Nav />
         {children}
