@@ -7,7 +7,7 @@ import { globFiles, readFile, readFileToArrayBuffer } from '@/services/file/read
 import { createDirectoryAndWriteFile, writeFileToDirectory } from '@/services/file/writer'
 import { embedFlacMetadata } from '@/services/flac'
 import { getImageMimeType } from '@/services/image/getImageMimeType'
-import { getImageSize } from '@/services/image/getImageSize'
+import { getImageInfo } from '@/services/image/getImageInfo'
 import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import PageLoading from '@/components/PageLoading'
 import FileProgressBar from '@/components/FileProgressBar'
@@ -66,8 +66,11 @@ export default function Audio() {
         try {
           const cover = cache?.cover ? await readFileToArrayBuffer(cache.cover.handle) : undefined
           const format = cache?.cover ? getImageMimeType(cache.cover.entry.name) : undefined
-          const coverSize = cover && format ? await getImageSize(cover, format) : undefined
-          const coverMetadata = { ...coverSize, format }
+          const coverMetadata = cover ? await getImageInfo(cover) : undefined
+          if (coverMetadata && !coverMetadata?.mimeType && format) {
+            coverMetadata.mimeType = format
+          }
+
           const lyrics = cache?.lyrics ? await readFile(cache.lyrics.handle) : undefined
           const metadataContent = cache?.metadata ? await readFile(cache.metadata.handle) : '{}'
           const metadata = (() => {

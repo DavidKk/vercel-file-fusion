@@ -11,14 +11,6 @@ export class Flac {
 
   protected get metadatas() {
     return this._metadatas.sort((a, b) => {
-      if (a.type === 0 && b.type !== 0) {
-        return -1
-      }
-
-      if (a.type !== 0 && b.type === 0) {
-        return 1
-      }
-
       if (a.isLast && !b.isLast) {
         return 1
       }
@@ -27,7 +19,7 @@ export class Flac {
         return -1
       }
 
-      return 0
+      return a.type - b.type
     })
   }
 
@@ -101,9 +93,10 @@ export class Flac {
   public toBuffer() {
     const header = new Uint8Array([0x66, 0x4c, 0x61, 0x43]) // "fLaC"
     const audioContent = new Uint8Array(this.audioContent)
+    const metadatas = this.metadatas
 
     // calculate metadata total size
-    const metadataSize = this._metadatas.reduce((size, metadata) => {
+    const metadataSize = metadatas.reduce((size, metadata) => {
       const content = metadata.toBuffer()
       return size + content.byteLength
     }, 0)
@@ -121,7 +114,7 @@ export class Flac {
     offset += header.length
 
     // write metadata
-    for (const metadata of this.metadatas) {
+    for (const metadata of metadatas) {
       const content = metadata.toBuffer()
       data.set(new Uint8Array(content), offset)
       offset += content.byteLength
