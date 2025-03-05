@@ -11,7 +11,7 @@ export { generateMetadata }
 
 export default function InvoicePage() {
   return (
-    <div className="w-full min-h-[calc(100vh-60px)] flex flex-col items-center">
+    <div className="w-full  flex flex-col items-center">
       <div className="flex flex-col gap-4 w-2/3 max-w-3xl mx-auto py-10">
         <Meta {...metaProps} />
         <PDFTextExtractor />

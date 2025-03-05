@@ -2,7 +2,10 @@
   "name": "vercel-file-fusion",
   "version": "0.1.0",
   "description": "Quick batch processing of locale files.",
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidKk/vercel-file-fusion.git"
+  },
   "scripts": {
     "commit": "git-cz",
     "ci:coverage": "pnpm test",

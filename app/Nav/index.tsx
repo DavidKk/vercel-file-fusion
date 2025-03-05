@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import FeatherIcon from 'feather-icons-react'
-import { DEFAULT_NAV, DEFAULT_TITLE } from './constants'
+import { name, repository } from '@/package.json'
+import { DEFAULT_NAV } from './constants'
 
 interface NavItem {
   name: string
@@ -12,6 +13,9 @@ interface NavProps {
   nav?: Record<string, NavItem[]>
 }
 
+const DEFAULT_TITLE = name.replace('vercel', '').split('-').join(' ')
+const GITHUB_URL = repository.url
+
 export function Nav(props: NavProps) {
   const { title = DEFAULT_TITLE, nav = DEFAULT_NAV } = props
 
@@ -19,7 +23,9 @@ export function Nav(props: NavProps) {
     <nav className="w-full p-4 bg-indigo-500 text-white">
       <div className="container-md flex items-center">
         <h1 className="text-xl font-bold">
-          <Link href="/">{title}</Link>
+          <Link className="capitalize" href="/">
+            {title}
+          </Link>
         </h1>
 
         <div className="ml-8 flex">
@@ -40,9 +46,13 @@ export function Nav(props: NavProps) {
           ))}
         </div>
 
-        <a className="ml-auto" href="https://github.com/DavidKk/vercel-file-fusion" target="_blank" rel="noreferrer">
-          <FeatherIcon icon="github" />
-        </a>
+        <div className="ml-auto flex gap-4">
+          {GITHUB_URL && (
+            <a href={GITHUB_URL} target="_blank" rel="noreferrer">
+              <FeatherIcon icon="github" />
+            </a>
+          )}
+        </div>
       </div>
     </nav>
   )

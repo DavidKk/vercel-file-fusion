@@ -55,7 +55,9 @@ export default function Audio() {
       let processedFiles = 0
 
       for await (const itemEntry of availableItems) {
-        if (!selectedFiles.has(itemEntry.name) || itemEntry.kind !== 'file') continue
+        if (!selectedFiles.has(itemEntry.name) || itemEntry.kind !== 'file') {
+          continue
+        }
 
         const itemName = itemEntry.name
         setCurrentFile(itemName)
