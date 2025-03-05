@@ -1,5 +1,5 @@
 declare namespace NodeJS {
   interface ProcessEnv {
-    BUILD_TIME: string
+    NEXT_PUBLIC_BUILD_TIME: string
   }
 }
