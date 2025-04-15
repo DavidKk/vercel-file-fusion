@@ -2,14 +2,12 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRequest } from 'ahooks'
-import { BlobReader, ERR_ENCRYPTED, ERR_INVALID_PASSWORD, Uint8ArrayWriter, ZipReader, type ZipReaderConstructorOptions } from '@zip.js/zip.js'
-import type { FileContent } from '@/services/file/types'
-import { transcodeEntryFileName } from '@/services/zip/decode'
-import { writeFileToDirectory } from '@/services/file/writer'
-import { sanitizeFileName } from '@/services/file/name'
-import Picker from '@/components/Picker'
+import { ZipReader, ZipWriter, BlobReader, BlobWriter } from '@zip.js/zip.js'
+import type { ZipWriterConstructorOptions } from '@zip.js/zip.js'
+import { showDirectoryPicker } from '@/services/file/common'
 import FileProgressBar from '@/components/FileProgressBar'
 import PageLoading from '@/components/PageLoading'
+import Picker from '@/components/Picker'
 import { Spinner } from '@/components/Spinner'
 
 type ViewMode = 'all' | 'error'
@@ -21,14 +19,13 @@ type UnzipResult = {
   loading?: boolean
 }
 
-export default function Unzip() {
+export default function Unroot() {
   const [ready, setReady] = useState(false)
-  const [currentZip, setCurrentZip] = useState('')
-  const [currentFile, setCurrentFile] = useState('')
-  const [totalProgress, setTotalProgress] = useState(0)
   const [password, setPassword] = useState('')
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [addRootFolder, setAddRootFolder] = useState(false)
+  const [currentUnrootFile, setCurrentUnrootFile] = useState('')
+  const [currentFile, setCurrentFile] = useState('')
+  const [totalProgress, setTotalProgress] = useState(0)
   const [results, setResults] = useState<UnzipResult[]>([])
   const [viewMode, setViewMode] = useState<ViewMode>('all')
   const filteredResults = useMemo(() => {
@@ -39,83 +36,121 @@ export default function Unzip() {
     return results
   }, [results, viewMode])
 
-  const { run: startUnzip } = useRequest(
+  useEffect(() => {
+    setReady(true)
+  }, [])
+
+  const { run: startUnroot } = useRequest(
     async () => {
+      let totalUnrootFiles = selectedFiles.length
+      if (totalUnrootFiles === 0) {
+        throw new Error('No files selected')
+      }
+
+      // Maully select output directory
+      const outputDirHandle = await showDirectoryPicker({ mode: 'readwrite' })
+
+      // Reset results
       setResults([])
 
-      const directoryHandle = await showDirectoryPicker()
-      const totalZips = selectedFiles.length
-      let processedZips = 0
-
+      let processedUnrootFiles = 0
       for await (const file of selectedFiles) {
         const zipFileName = file.name
-        setCurrentZip(zipFileName)
+        const zipReader = new ZipReader(new BlobReader(file))
+        const entries = await zipReader.getEntries()
+        if (entries.length === 0) {
+          totalUnrootFiles--
+          continue
+        }
 
-        setResults((prev) => [...prev, { file: zipFileName, loading: true }])
-
-        try {
-          const unzipOptions: ZipReaderConstructorOptions = {}
-          if (password) {
-            unzipOptions.password = password
+        // Check for single root directory
+        const rootDirs = new Set()
+        for (const entry of entries) {
+          const parts = entry.filename.split('/')
+          if (!(parts.length > 1)) {
+            continue
           }
 
-          const zipReader = new ZipReader(new BlobReader(file), unzipOptions)
-          const entries = await zipReader.getEntries()
-          const totalFiles = entries.filter((entry) => !entry.directory && entry.getData).length
-          let processedFiles = 0
+          rootDirs.add(parts[0])
+        }
 
+        // If there's more than one root directory, skip this file
+        if (rootDirs.size !== 1) {
+          totalUnrootFiles--
+          continue
+        }
+
+        // Unroot files
+        let processedFiles = 0
+
+        const outputFileName = zipFileName.replace(/\.zip$/, '.unroot.zip')
+        setCurrentUnrootFile(outputFileName)
+        setResults((prev) => [...prev, { file: outputFileName, loading: true }])
+
+        try {
+          // Create new zip file
+          const zipOptions: ZipWriterConstructorOptions = {}
+          if (password) {
+            zipOptions.password = password
+          }
+
+          const zipWriter = new ZipWriter(new BlobWriter('application/zip'), zipOptions)
+          const totalFiles = entries.length
           for await (const entry of entries) {
-            if (entry.directory || !entry.getData) {
+            if (entry.directory) {
               continue
             }
 
-            const name = addRootFolder ? `${zipFileName.replace('.zip', '')}/${transcodeEntryFileName(entry)}` : transcodeEntryFileName(entry)
-            const sanitizedName = name
-              .split('/')
-              .map((item) => sanitizeFileName(item))
-              .join('/')
+            const parts = entry.filename.split('/')
+            const name = parts.slice(1).join('/')
 
-            let content: FileContent
-            try {
-              content = await entry.getData(new Uint8ArrayWriter(), {
-                onprogress: async (progress, total) => {
-                  const readProgress = (progress / total) * 50
-                  const totalProgress = ((processedZips + (processedFiles + readProgress / 100) / totalFiles) / totalZips) * 100
-                  setTotalProgress(totalProgress)
-                },
-              })
-            } catch (error) {
-              if (error instanceof Error) {
-                if (error.message === ERR_ENCRYPTED || error.message === ERR_INVALID_PASSWORD) {
-                  throw new Error('Incorrect password')
-                }
-              }
-
-              throw error
+            // Verify entry and get data
+            if (!entry || !entry.getData) {
+              throw new Error(`Invalid entry in ${zipFileName}`)
             }
 
-            await writeFileToDirectory(sanitizedName, content, {
-              directoryHandle,
-              onProgress(progress, total) {
-                setCurrentFile(name)
+            const fileData = await entry.getData(new BlobWriter())
+            if (!fileData) {
+              throw new Error(`Failed to extract data from ${entry.filename}`)
+            }
 
+            await zipWriter.add(name, new BlobReader(fileData), {
+              onprogress: async (progress, total) => {
                 const writeProgress = (progress / total) * 50
-                const totalProgress = ((processedZips + (processedFiles + 0.5 + writeProgress / 100) / totalFiles) / totalZips) * 100
+                const totalProgress = ((processedUnrootFiles + (processedFiles + writeProgress / 100) / totalFiles) / totalUnrootFiles) * 100
+
                 setTotalProgress(totalProgress)
+                setCurrentFile(name)
               },
             })
 
             processedFiles += 1
           }
 
-          processedZips += 1
-          setTotalProgress((processedZips / totalZips) * 100)
-          setResults((prev) => prev.map((result) => (result.file === zipFileName ? { ...result, success: true, loading: false } : result)))
+          const zipBlob = await zipWriter.close()
+
+          const zipFile = new File([zipBlob], outputFileName, { type: 'application/zip' })
+
+          const writable = await outputDirHandle.getFileHandle(outputFileName, { create: true })
+
+          const writableStream = await writable.createWritable()
+          await writableStream.write(zipFile)
+          await writableStream.close()
+
+          // Update results
+          processedFiles += 1
+          setTotalProgress((processedFiles / totalUnrootFiles) * 100)
+          setResults((prev) => prev.map((result) => (result.file === outputFileName ? { ...result, success: true, loading: false } : result)))
         } catch (error) {
           setResults((prev) =>
-            prev.map((result) => (result.file === zipFileName ? { ...result, success: false, loading: false, error: error instanceof Error ? error.message : '未知错误' } : result))
+            prev.map((result) =>
+              result.file === outputFileName ? { ...result, success: false, loading: false, error: error instanceof Error ? error.message : 'Unknown error' } : result
+            )
           )
         }
+
+        processedUnrootFiles += 1
+        setTotalProgress((processedUnrootFiles / totalUnrootFiles) * 100)
       }
     },
     {
@@ -125,42 +160,18 @@ export default function Unzip() {
         setSelectedFiles([])
         setTimeout(() => setTotalProgress(0), 500)
       },
-      onError: () => {
+      onError: (error) => {
+        // eslint-disable-next-line no-console
+        console.error(error)
+
         setTotalProgress(0)
       },
       onFinally: () => {
-        setCurrentZip('')
+        setCurrentUnrootFile('')
         setCurrentFile('')
       },
     }
   )
-
-  useEffect(() => {
-    const savedPassword = localStorage.getItem('unzipPassword')
-    const savedAddRootFolder = localStorage.getItem('unzipAddRootFolder')
-
-    if (savedPassword) {
-      setPassword(savedPassword)
-    }
-
-    if (savedAddRootFolder) {
-      setAddRootFolder(savedAddRootFolder === 'true')
-    }
-
-    setReady(true)
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem('unzipPassword', password)
-  }, [password])
-
-  useEffect(() => {
-    localStorage.setItem('unzipAddRootFolder', addRootFolder.toString())
-  }, [addRootFolder])
-
-  if (!ready) {
-    return <PageLoading />
-  }
 
   const renderResultHeader = () => {
     return (
@@ -193,7 +204,7 @@ export default function Unzip() {
           barClassName="rounded-none"
           noText={true}
           progress={totalProgress}
-          message={totalProgress >= 100 ? 'Finish' : `${currentZip}: extracting ${currentFile}`}
+          message={totalProgress >= 100 ? 'Finish' : `${currentUnrootFile}: processing ${currentFile}`}
         />
       </div>
     )
@@ -245,6 +256,10 @@ export default function Unzip() {
     )
   }
 
+  if (!ready) {
+    return <PageLoading />
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <input
@@ -266,15 +281,8 @@ export default function Unzip() {
         selectedFiles={selectedFiles}
       />
 
-      <div className="w-full flex flex-col">
-        <label className="px-2 text-gray-600 inline-flex items-center cursor-pointer">
-          <input type="checkbox" checked={addRootFolder} onChange={(e) => setAddRootFolder(e.target.checked)} />
-          <span className="ml-2">Add root folder for each unzip</span>
-        </label>
-      </div>
-
-      <button onClick={() => startUnzip()} className="w-full bg-indigo-600 text-white p-2 rounded disabled:opacity-50" disabled={selectedFiles.length === 0 || totalProgress > 0}>
-        Start Unzipping
+      <button onClick={() => startUnroot()} className="w-full bg-indigo-600 text-white p-2 rounded disabled:opacity-50" disabled={selectedFiles.length === 0 || totalProgress > 0}>
+        Start Unroot
       </button>
 
       {(results.length > 0 || totalProgress > 0) && (

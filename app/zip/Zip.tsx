@@ -30,10 +30,14 @@ export default function Zip() {
 
   const { run: startZip, loading } = useRequest(
     async () => {
-      const outputDirHandle = await showDirectoryPicker()
       const totalFolders = selectedFolders.size
-      let processedFolders = 0
+      if (totalFolders === 0) {
+        throw new Error('No files selected')
+      }
 
+      const outputDirHandle = await showDirectoryPicker({ mode: 'readwrite' })
+
+      let processedFolders = 0
       for await (const itemEntry of availableItems) {
         if (!selectedFolders.has(itemEntry.name)) {
           continue
@@ -47,17 +51,17 @@ export default function Zip() {
           zipOptions.password = password
         }
 
-        let files = []
+        const files = new Map<string, FileSystemFileHandle>()
         if (isDirectoryEntry(itemEntry)) {
           const fileEntries = await globFiles(itemEntry.handle)
           for (const fileEntry of fileEntries) {
-            files.push(fileEntry.handle)
+            files.set(fileEntry.name, fileEntry.handle)
           }
         } else {
-          files.push(itemEntry.handle)
+          files.set(itemEntry.name, itemEntry.handle)
         }
 
-        const totalFiles = files.length
+        const totalFiles = files.size
         if (totalFiles === 0) {
           alertRef.current?.show(`File ${itemEntry.name} is empty and will be skipped.`, { type: 'warn' })
           continue
@@ -66,28 +70,30 @@ export default function Zip() {
         const zipWriter = new ZipWriter(new BlobWriter('application/zip'), zipOptions)
 
         let processedFiles = 0
-        for (const file of files) {
-          const basename = file.name.split('/').pop()!
+        for (const [name, file] of files.entries()) {
+          const basename = name.split('/').pop()!
           if (EXCLUDES_FILES.includes(basename)) {
             continue
           }
 
           const fileData = await readFile(file)
           const blob = new Blob([fileData], { type: 'text/plain' })
-          const fileName = addRootFolder ? `${itemName}/${file.name}` : file.name
+          const fileName = addRootFolder ? `${itemName}/${name}` : name
           await zipWriter.add(fileName, new BlobReader(blob), {
             onprogress: async (progress, total) => {
               const writeProgress = (progress / total) * 50
               const totalProgress = ((processedFolders + (processedFiles + writeProgress / 100) / totalFiles) / totalFolders) * 100
               setTotalProgress(totalProgress)
-              setCurrentFile(file.name)
+              setCurrentFile(name)
             },
           })
+
           processedFiles += 1
         }
 
         const zipBlob = await zipWriter.close()
         const zipFile = new File([zipBlob], `${itemName}.zip`, { type: 'application/zip' })
+
         const writable = await outputDirHandle.getFileHandle(`${itemName}.zip`, { create: true })
         const writableStream = await writable.createWritable()
         await writableStream.write(zipFile)
@@ -105,6 +111,94 @@ export default function Zip() {
         setTimeout(() => setTotalProgress(0), 500)
       },
       onError: (error) => {
+        // eslint-disable-next-line no-console
+        console.error(error)
+
+        setTotalProgress(0)
+        alertRef.current?.show(error.message, { type: 'error' })
+      },
+      onFinally: () => {
+        setCurrentFolder('')
+        setCurrentFile('')
+      },
+    }
+  )
+
+  const { run: startMergeZip, loading: mergeLoading } = useRequest(
+    async () => {
+      const zipOptions: ZipWriterConstructorOptions = {}
+      if (password) {
+        zipOptions.password = password
+      }
+
+      const zipWriter = new ZipWriter(new BlobWriter('application/zip'), zipOptions)
+      const allFiles = new Map<string, FileSystemFileHandle>()
+
+      for await (const itemEntry of availableItems) {
+        if (!selectedFolders.has(itemEntry.name)) {
+          continue
+        }
+
+        if (isDirectoryEntry(itemEntry)) {
+          const fileEntries = await globFiles(itemEntry.handle)
+          for (const fileEntry of fileEntries) {
+            allFiles.set(fileEntry.name, fileEntry.handle)
+          }
+        } else {
+          allFiles.set(itemEntry.name, itemEntry.handle)
+        }
+      }
+
+      const totalFiles = allFiles.size
+      if (totalFiles === 0) {
+        alertRef.current?.show('No files selected or all files are empty', { type: 'warn' })
+        return
+      }
+
+      let processedFiles = 0
+      for (const [name, file] of allFiles.entries()) {
+        const basename = name.split('/').pop()!
+        if (EXCLUDES_FILES.includes(basename)) {
+          continue
+        }
+
+        setCurrentFile(name)
+        const fileData = await readFile(file)
+        const blob = new Blob([fileData], { type: 'text/plain' })
+        await zipWriter.add(name, new BlobReader(blob), {
+          onprogress: async (progress, total) => {
+            const writeProgress = (progress / total) * 100
+            setTotalProgress(writeProgress)
+          },
+        })
+        processedFiles += 1
+      }
+
+      const zipBlob = await zipWriter.close()
+
+      const outputFileName = 'merged_files.zip'
+      const zipFile = new File([zipBlob], outputFileName, { type: 'application/zip' })
+
+      const outputDirHandle = await showDirectoryPicker({ mode: 'readwrite' })
+      const writable = await outputDirHandle.getFileHandle(outputFileName, { create: true })
+
+      const writableStream = await writable.createWritable()
+      await writableStream.write(zipFile)
+      await writableStream.close()
+
+      setTotalProgress(100)
+    },
+    {
+      manual: true,
+      onSuccess: () => {
+        setTotalProgress(100)
+        setSelectedFolders(new Set())
+        setTimeout(() => setTotalProgress(0), 500)
+      },
+      onError: (error) => {
+        // eslint-disable-next-line no-console
+        console.error(error)
+
         setTotalProgress(0)
         alertRef.current?.show(error.message, { type: 'error' })
       },
@@ -121,7 +215,7 @@ export default function Zip() {
 
   return (
     <div className="flex flex-col gap-2">
-      <ResourcePicker {...workspaceContext} disabled={loading} />
+      <ResourcePicker {...workspaceContext} disabled={loading || mergeLoading} />
 
       {isWorkspaceSelected && (
         <>
@@ -132,19 +226,34 @@ export default function Zip() {
           <div className="w-full flex flex-col">
             <label className="text-gray-600 inline-flex items-center cursor-pointer">
               <input type="checkbox" checked={addRootFolder} onChange={(e) => setAddRootFolder(e.target.checked)} />
-              <span className="ml-2">Add root folder for each zip</span>
+              <span className="ml-2">Add root folder for zip</span>
             </label>
           </div>
 
-          <button onClick={() => startZip()} className="w-full bg-indigo-600 text-white p-2 rounded disabled:opacity-50" disabled={selectedFolders.size === 0 || totalProgress > 0}>
-            Start Zipping
-          </button>
+          <div className="w-full flex gap-2">
+            <button
+              onClick={() => startZip()}
+              className="flex-1 bg-indigo-600 text-white p-2 rounded disabled:opacity-50"
+              disabled={selectedFolders.size === 0 || totalProgress > 0}
+            >
+              Zip Individually
+            </button>
+            <button
+              onClick={() => startMergeZip()}
+              className="flex-1 bg-indigo-600 text-white p-2 rounded disabled:opacity-50"
+              disabled={selectedFolders.size === 0 || totalProgress > 0}
+            >
+              Merge to Single Zip
+            </button>
+          </div>
         </>
       )}
 
       <div className="w-full h-10 flex flex-col gap-4">
         <Alert ref={alertRef} />
-        {totalProgress > 0 && <FileProgressBar progress={totalProgress} message={totalProgress >= 100 ? 'Finish' : `${currentFolder}: compressing ${currentFile}`} />}
+        {totalProgress > 0 && (
+          <FileProgressBar progress={totalProgress} message={totalProgress >= 100 ? 'Finish' : `${currentFolder ? currentFolder + ': ' : ''}compressing ${currentFile}`} />
+        )}
       </div>
     </div>
   )

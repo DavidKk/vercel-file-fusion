@@ -7,12 +7,12 @@ export interface ResourcePickerProps {
   selectableItems: (FileEntry | DirectoryEntry)[]
   onItemSelect: (selectedItems: Set<string>) => void
   selects: Set<string>
-  disabled: boolean
+  disabled?: boolean
   afterItemRender?: (item: FileEntry | DirectoryEntry) => React.ReactNode
 }
 
 export default function ResourcePicker(props: ResourcePickerProps) {
-  const { selectedHandle, handleSelect: onWorkspaceSelect, selectableItems, onItemSelect, selects, disabled, afterItemRender } = props
+  const { selectedHandle, handleSelect: onWorkspaceSelect, selectableItems, onItemSelect, selects, disabled = false, afterItemRender } = props
   const [allSelected, setAllSelected] = useState(false)
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {

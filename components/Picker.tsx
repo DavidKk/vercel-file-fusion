@@ -30,7 +30,7 @@ export default function Picker(props: PickerProps) {
   return (
     <div
       {...getRootProps()}
-      className={`border-2 border-dashed border-[2px] rounded-md border-gray-400 p-6 text-center cursor-pointer w-full h-auto flex flex-col items-center justify-center transition-opacity ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
+      className={`border-2 border-dashed border-[2px] rounded-md border-gray-300 p-6 text-center cursor-pointer w-full h-auto flex flex-col items-center justify-center transition-opacity ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
     >
       <input {...getInputProps()} disabled={disabled} />
       {selectedFiles.length === 0 ? (

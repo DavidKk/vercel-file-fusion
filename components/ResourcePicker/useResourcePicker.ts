@@ -51,7 +51,6 @@ export default function useResourcePicker(options: UseResourcePickerOptions) {
 
       // Compare old and new file lists, only update state when there are changes
       const hasChanges = selectableItems.length !== sortedItems.length || selectableItems.some((item, index) => item.name !== sortedItems[index]?.name)
-
       if (hasChanges) {
         setSelectableItems(sortedItems)
       }
