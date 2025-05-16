@@ -7,6 +7,7 @@ import type { FileContent } from '@/services/file/types'
 import { transcodeEntryFileName } from '@/services/zip/decode'
 import { writeFileToDirectory } from '@/services/file/writer'
 import { sanitizeFileName } from '@/services/file/name'
+import { openDirectoryPicker } from '@/services/file/common'
 import Picker from '@/components/Picker'
 import FileProgressBar from '@/components/FileProgressBar'
 import PageLoading from '@/components/PageLoading'
@@ -43,7 +44,7 @@ export default function Unzip() {
     async () => {
       setResults([])
 
-      const directoryHandle = await showDirectoryPicker()
+      const directoryHandle = await openDirectoryPicker()
       const totalZips = selectedFiles.length
       let processedZips = 0
 

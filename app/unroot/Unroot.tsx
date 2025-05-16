@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useRequest } from 'ahooks'
 import { ZipReader, ZipWriter, BlobReader, BlobWriter } from '@zip.js/zip.js'
 import type { ZipWriterConstructorOptions } from '@zip.js/zip.js'
-import { showDirectoryPicker } from '@/services/file/common'
+import { openDirectoryPicker } from '@/services/file/common'
 import FileProgressBar from '@/components/FileProgressBar'
 import PageLoading from '@/components/PageLoading'
 import Picker from '@/components/Picker'
@@ -48,7 +48,7 @@ export default function Unroot() {
       }
 
       // Maully select output directory
-      const outputDirHandle = await showDirectoryPicker({ mode: 'readwrite' })
+      const outputDirHandle = await openDirectoryPicker({ mode: 'readwrite' })
 
       // Reset results
       setResults([])

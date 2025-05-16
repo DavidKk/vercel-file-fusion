@@ -1,6 +1,7 @@
-import { globFiles } from '@/services/file/reader'
 import { useInterval, useDebounceFn } from 'ahooks'
 import { useState, useCallback } from 'react'
+import { openDirectoryPicker } from '@/services/file/common'
+import { globFiles } from '@/services/file/reader'
 import type { FileEntry, DirectoryEntry } from '@/services/file/types'
 
 interface UseResourcePickerOptions {
@@ -66,7 +67,7 @@ export default function useResourcePicker(options: UseResourcePickerOptions) {
   )
 
   const handleSelect = async () => {
-    const directoryHandle = await showDirectoryPicker()
+    const directoryHandle = await openDirectoryPicker()
     setSelectedHandle(directoryHandle)
     syncWorkspace(directoryHandle)
   }

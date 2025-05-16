@@ -4,7 +4,7 @@ import { useRequest } from 'ahooks'
 import { useState, useEffect, useRef } from 'react'
 import * as pdfjsLib from 'pdfjs-dist'
 import Decimal from 'decimal.js'
-import { showDirectoryPicker } from '@/services/file/common'
+import { openDirectoryPicker } from '@/services/file/common'
 import Alert, { type AlertImperativeHandler } from '@/components/Alert'
 import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import PageLoading from '@/components/PageLoading'
@@ -130,7 +130,7 @@ export default function PDFTextExtractor() {
 
   const { run: handleMoveFiles } = useRequest(
     async () => {
-      const targetDirectory = await showDirectoryPicker()
+      const targetDirectory = await openDirectoryPicker()
       for (const invoice of usedInvoices) {
         const fileEntry = availableItems.find((item) => item.name === invoice.file)
         if (!(fileEntry && fileEntry.kind === 'file')) {

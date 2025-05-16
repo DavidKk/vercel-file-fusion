@@ -1,3 +1,4 @@
+import { openDirectoryPicker } from '@/services/file/common'
 import type { DirectoryEntry, FileEntry } from './types'
 
 export async function readFile(fileHandle: FileSystemFileHandle) {
@@ -14,7 +15,7 @@ export async function readFileToArrayBuffer(fileHandle: FileSystemFileHandle) {
 
 export async function readdir(directoryHandle?: FileSystemDirectoryHandle): Promise<Array<FileEntry | DirectoryEntry>> {
   if (!directoryHandle) {
-    directoryHandle = await showDirectoryPicker()
+    directoryHandle = await openDirectoryPicker()
   }
 
   const files: Array<FileEntry | DirectoryEntry> = []

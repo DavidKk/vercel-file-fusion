@@ -6,4 +6,5 @@ export const DEFAULT_NAV = {
   ],
   pdf: [{ name: 'Invoice Optimizer', href: '/invoice' }],
   media: [{ name: 'Audio Embedder', href: '/audio' }],
+  sheet: [{ name: 'XLSX Merge', href: '/xlsx/merge' }],
 }

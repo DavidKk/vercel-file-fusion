@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from 'react'
 import { useRequest } from 'ahooks'
 import { BlobReader, BlobWriter, ZipWriter, type ZipWriterConstructorOptions } from '@zip.js/zip.js'
 import { globFiles, readFile } from '@/services/file/reader'
-import { showDirectoryPicker } from '@/services/file/common'
+import { openDirectoryPicker } from '@/services/file/common'
 import Alert, { type AlertImperativeHandler } from '@/components/Alert'
 import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import FileProgressBar from '@/components/FileProgressBar'
@@ -35,7 +35,7 @@ export default function Zip() {
         throw new Error('No files selected')
       }
 
-      const outputDirHandle = await showDirectoryPicker({ mode: 'readwrite' })
+      const outputDirHandle = await openDirectoryPicker({ mode: 'readwrite' })
 
       let processedFolders = 0
       for await (const itemEntry of availableItems) {
@@ -179,7 +179,7 @@ export default function Zip() {
       const outputFileName = 'merged_files.zip'
       const zipFile = new File([zipBlob], outputFileName, { type: 'application/zip' })
 
-      const outputDirHandle = await showDirectoryPicker({ mode: 'readwrite' })
+      const outputDirHandle = await openDirectoryPicker({ mode: 'readwrite' })
       const writable = await outputDirHandle.getFileHandle(outputFileName, { create: true })
 
       const writableStream = await writable.createWritable()

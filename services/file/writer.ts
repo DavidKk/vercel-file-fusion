@@ -1,5 +1,5 @@
 import type { FileContent } from './types'
-import { showDirectoryPicker } from './common'
+import { openDirectoryPicker } from './common'
 
 export interface WritableFile {
   name: string
@@ -88,7 +88,7 @@ export interface WriteFileToDirectoryOptions extends WriteFileOptions {
  * Writes content to a file in the specified directory, creating the directory structure if needed
  */
 export async function writeFileToDirectory(name: string, content: FileContent, options?: WriteFileToDirectoryOptions) {
-  const { directoryHandle = await showDirectoryPicker({ mode: 'readwrite' }) } = options || {}
+  const { directoryHandle = await openDirectoryPicker({ mode: 'readwrite' }) } = options || {}
   if (!(await isWriteableDirectoryHandle(directoryHandle))) {
     throw new Error('Permission denied for directory')
   }
@@ -115,7 +115,7 @@ export interface CreateDirectoryAndWriteFileOptions extends WriteFileOptions {
  * Creates a new directory and writes multiple files to it
  */
 export async function createDirectoryAndWriteFile(directoryName: string, files: WritableFile[], options?: CreateDirectoryAndWriteFileOptions) {
-  const { directoryHandle = await showDirectoryPicker({ mode: 'readwrite' }) } = options || {}
+  const { directoryHandle = await openDirectoryPicker({ mode: 'readwrite' }) } = options || {}
   if (!(await isWriteableDirectoryHandle(directoryHandle))) {
     throw new Error('Permission denied for directory')
   }

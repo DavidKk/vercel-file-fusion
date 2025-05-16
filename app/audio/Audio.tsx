@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRequest } from 'ahooks'
-import { showOpenFilePicker, showDirectoryPicker } from '@/services/file/common'
+import { openFilePicker, openDirectoryPicker } from '@/services/file/common'
 import { globFiles, readFile, readFileToArrayBuffer } from '@/services/file/reader'
 import { createDirectoryAndWriteFile, writeFileToDirectory } from '@/services/file/writer'
 import { embedFlacMetadata } from '@/services/flac'
@@ -50,7 +50,7 @@ export default function Audio() {
   const { run: startEmbedding, loading } = useRequest(
     async () => {
       setAudioResults([])
-      const outputDirHandle = await showDirectoryPicker()
+      const outputDirHandle = await openDirectoryPicker()
       const totalFiles = selectedFiles.size
       let processedFiles = 0
 
@@ -180,7 +180,7 @@ export default function Audio() {
 
   const handleFileSelect = async (type: 'cover' | 'lyrics' | 'metadata', itemName: string) => {
     try {
-      const [fileHandle] = await showOpenFilePicker({
+      const [fileHandle] = await openFilePicker({
         types: [
           {
             description: type === 'cover' ? 'Image files' : type === 'lyrics' ? 'Lyrics files' : 'Metadata files',
