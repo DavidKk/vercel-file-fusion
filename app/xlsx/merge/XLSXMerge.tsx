@@ -9,7 +9,6 @@ import FileProgressBar from '@/components/FileProgressBar'
 import PageLoading from '@/components/PageLoading'
 import { openDirectoryPicker } from '@/services/file/common'
 import MultiSelect from '@/components/MultiSelect'
-import ClearableSelect from '@/components/ClearableSelect'
 
 type MergeResult = {
   file: string
@@ -72,6 +71,7 @@ export default function XLSXMerge() {
             break
           }
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error('Error reading headers:', error)
         }
       }

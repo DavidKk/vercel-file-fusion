@@ -8,4 +8,5 @@ export const DEFAULT_NAV = {
   media: [{ name: 'Audio Embedder', href: '/audio' }],
   sheet: [{ name: 'XLSX Merge', href: '/xlsx/merge' }],
   json: [{ name: 'I18N Splitter', href: '/i18n-splitter' }],
+  $convert: [{ name: 'Rename', href: '/rename' }],
 }
