@@ -1,4 +1,4 @@
-import type { ConversionType, ConversionOption } from '@/app/rename/types/types'
+import type { ConversionOption, ConversionType } from '@/app/rename/types/types'
 
 export type ConversionSelectorProps = {
   value: ConversionType

@@ -1,4 +1,5 @@
 import { Spinner } from '@/components/Spinner'
+
 import type { Invoice } from './type'
 
 export type InvoiceItemColor = 'normal' | 'selected' | 'error'

@@ -1,16 +1,18 @@
 'use client'
 
-import { useRef, useState, useEffect } from 'react'
-import { useRequest } from 'ahooks'
 import { BlobReader, BlobWriter, ZipWriter, type ZipWriterConstructorOptions } from '@zip.js/zip.js'
-import { globFiles, readFile } from '@/services/file/reader'
-import { openDirectoryPicker } from '@/services/file/common'
+import { useRequest } from 'ahooks'
+import { useEffect, useRef, useState } from 'react'
+
 import Alert, { type AlertImperativeHandler } from '@/components/Alert'
-import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import FileProgressBar from '@/components/FileProgressBar'
 import PageLoading from '@/components/PageLoading'
-import { EXCLUDES_FILES } from './constants'
+import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
+import { openDirectoryPicker } from '@/services/file/common'
+import { globFiles, readFile } from '@/services/file/reader'
 import { isDirectoryEntry } from '@/services/file/types'
+
+import { EXCLUDES_FILES } from './constants'
 
 export default function Zip() {
   const [ready, setReady] = useState(false)

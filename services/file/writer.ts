@@ -1,5 +1,5 @@
-import type { FileContent } from './types'
 import { openDirectoryPicker } from './common'
+import type { FileContent } from './types'
 
 export interface WritableFile {
   name: string

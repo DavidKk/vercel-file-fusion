@@ -1,5 +1,5 @@
 import { FlacMetadata } from './FlacMetadata'
-import { encodeVorbisComments, decodeVorbisComments } from './vorbis-comments'
+import { decodeVorbisComments, encodeVorbisComments } from './vorbis-comments'
 
 export class FlacVorbisComments extends FlacMetadata {
   static readonly TYPE = 4

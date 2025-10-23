@@ -1,8 +1,9 @@
-import { useInterval, useDebounceFn } from 'ahooks'
-import { useState, useCallback } from 'react'
+import { useDebounceFn, useInterval } from 'ahooks'
+import { useCallback, useState } from 'react'
+
 import { openDirectoryPicker } from '@/services/file/common'
 import { globFiles } from '@/services/file/reader'
-import type { FileEntry, DirectoryEntry } from '@/services/file/types'
+import type { DirectoryEntry, FileEntry } from '@/services/file/types'
 
 interface UseResourcePickerOptions {
   only?: 'file' | 'directory'

@@ -1,4 +1,5 @@
 import Meta, { generate } from '@/components/Meta'
+
 import PDFTextExtractor from './PDFTextExtractor'
 
 const { generateMetadata, metaProps } = generate({

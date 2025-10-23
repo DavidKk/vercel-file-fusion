@@ -1,12 +1,14 @@
 import importPlugin from 'eslint-plugin-import'
 import prettierPlugin from 'eslint-plugin-prettier'
-import tsConfig from './eslintrc/ts.mjs'
+import simpleImportSortPlugin from 'eslint-plugin-simple-import-sort'
+
 import cjsConfig from './eslintrc/cjs.mjs'
 import esmConfig from './eslintrc/esm.mjs'
+import tsConfig from './eslintrc/ts.mjs'
 
 export default [
   {
-    ignores: ['.next/**/*', '.husky/**/*', 'coverage/**/*', 'node_modules'],
+    ignores: ['.next/**/*', '.husky/**/*', 'coverage/**/*', 'node_modules', 'playwright-report/**/*', 'test-results/**/*', 'playwright.config.ts'],
   },
   {
     languageOptions: {
@@ -22,6 +24,7 @@ export default [
     plugins: {
       'eslint-plugin-import': importPlugin,
       'eslint-plugin-prettier': prettierPlugin,
+      'eslint-plugin-simple-import-sort': simpleImportSortPlugin,
     },
     rules: {
       'max-len': [
@@ -43,6 +46,8 @@ export default [
           devDependencies: ['**/*.spec.ts', '**/*/jest.config.*.ts', 'eslintrc/**/*.mjs', 'scripts/**/*.mjs', 'jest/**/*.ts', '.cz-config.js', '**/eslint.config.mjs'],
         },
       ],
+      'eslint-plugin-simple-import-sort/exports': 'error',
+      'eslint-plugin-simple-import-sort/imports': 'error',
     },
   },
   ...tsConfig,

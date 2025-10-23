@@ -1,19 +1,21 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
 import { useRequest } from 'ahooks'
-import { openFilePicker, openDirectoryPicker } from '@/services/file/common'
+import FeatherIcon from 'feather-icons-react'
+import { useEffect, useMemo, useState } from 'react'
+
+import FileProgressBar from '@/components/FileProgressBar'
+import PageLoading from '@/components/PageLoading'
+import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
+import { openDirectoryPicker, openFilePicker } from '@/services/file/common'
+import { fuzzyMatchFileName } from '@/services/file/fuzzyMatch'
+import { basename } from '@/services/file/path'
 import { globFiles, readFile, readFileToArrayBuffer } from '@/services/file/reader'
 import { createDirectoryAndWriteFile, writeFileToDirectory } from '@/services/file/writer'
 import { embedFlacMetadata } from '@/services/flac'
-import { getImageMimeType } from '@/services/image/getImageMimeType'
 import { getImageInfo } from '@/services/image/getImageInfo'
-import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
-import PageLoading from '@/components/PageLoading'
-import FileProgressBar from '@/components/FileProgressBar'
-import FeatherIcon from 'feather-icons-react'
-import { basename } from '@/services/file/path'
-import { fuzzyMatchFileName } from '@/services/file/fuzzyMatch'
+import { getImageMimeType } from '@/services/image/getImageMimeType'
+
 import { COVER_EXTNAME, LYRICS_EXTNAME, METADATA_EXTNAME } from './constants'
 
 interface FileCache {

@@ -1,4 +1,5 @@
-import type { FileInfo, DirectoryInfo } from '@/app/rename/types/types'
+import type { DirectoryInfo, FileInfo } from '@/app/rename/types/types'
+import { formatFileSize } from '@/utils/format'
 
 export type ItemsListProps = {
   files: FileInfo[]
@@ -79,7 +80,7 @@ export function ItemsList({ files, directories }: ItemsListProps) {
               </div>
               <div className="flex items-center gap-2">
                 {willChange && <span className="text-xs text-blue-600 font-medium">Will be renamed</span>}
-                <span className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</span>
+                <span className="text-xs text-gray-500">{formatFileSize(file.size)}</span>
               </div>
             </div>
           )

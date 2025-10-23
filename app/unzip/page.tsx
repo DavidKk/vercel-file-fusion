@@ -1,4 +1,5 @@
 import Meta, { generate } from '@/components/Meta'
+
 import Unzip from './Unzip'
 
 const { generateMetadata, metaProps } = generate({

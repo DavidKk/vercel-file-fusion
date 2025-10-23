@@ -1,4 +1,5 @@
 import { openDirectoryPicker } from '@/services/file/common'
+
 import type { DirectoryEntry, FileEntry } from './types'
 
 export async function readFile(fileHandle: FileSystemFileHandle) {

@@ -1,5 +1,6 @@
 import FileProgressBar from '@/components/FileProgressBar'
 import { Spinner } from '@/components/Spinner'
+
 import type { ResultItem } from '../hooks/useRenameFlow'
 
 export type ResultsPanelProps = {

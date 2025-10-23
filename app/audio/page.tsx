@@ -1,4 +1,5 @@
 import Meta, { generate } from '@/components/Meta'
+
 import Audio from './Audio'
 
 const { generateMetadata, metaProps } = generate({

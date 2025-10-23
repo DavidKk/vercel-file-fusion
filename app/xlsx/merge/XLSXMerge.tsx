@@ -1,14 +1,15 @@
 'use client'
 
-import { useRef, useState, useMemo, useEffect } from 'react'
 import { useRequest } from 'ahooks'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import * as XLSX from 'xlsx'
+
 import Alert, { type AlertImperativeHandler } from '@/components/Alert'
-import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
 import FileProgressBar from '@/components/FileProgressBar'
-import PageLoading from '@/components/PageLoading'
-import { openDirectoryPicker } from '@/services/file/common'
 import MultiSelect from '@/components/MultiSelect'
+import PageLoading from '@/components/PageLoading'
+import ResourcePicker, { useResourcePicker } from '@/components/ResourcePicker'
+import { openDirectoryPicker } from '@/services/file/common'
 
 type MergeResult = {
   file: string

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { openDirectoryPicker } from '@/services/file/common'
+
+import { type ConversionType, type DirectoryInfo, type FileInfo, isConversionType } from '@/app/rename/types/types'
 import { convertChinese } from '@/services/chinese-converter'
 import { dirname, getDirectoryHandleByPath, isDirectoryHandle, isFileHandle, join, moveDirectoryRecursive } from '@/services/file'
-import { isConversionType, type ConversionType, type DirectoryInfo, type FileInfo } from '@/app/rename/types/types'
+import { openDirectoryPicker } from '@/services/file/common'
 
 export type ResultItemMethod = 'move' | 'copy' | 'rename'
 

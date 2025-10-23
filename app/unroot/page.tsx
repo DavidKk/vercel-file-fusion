@@ -1,4 +1,5 @@
 import Meta, { generate } from '@/components/Meta'
+
 import Unroot from './Unroot'
 
 const { generateMetadata, metaProps } = generate({

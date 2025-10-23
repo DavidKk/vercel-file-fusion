@@ -1,9 +1,11 @@
 'use client'
 
 import { useMemo } from 'react'
-import { supportsMoveAPI } from '@/services/file'
-import { useClient } from '@/hooks/useClient'
+
 import { Spinner } from '@/components/Spinner'
+import { useClient } from '@/hooks/useClient'
+import { supportsMoveAPI } from '@/services/file'
+
 import { IconCheck, IconWarning } from './components/icons'
 
 export function Tooltips() {

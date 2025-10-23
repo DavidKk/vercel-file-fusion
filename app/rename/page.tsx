@@ -1,4 +1,5 @@
 import Meta, { generate } from '@/components/Meta'
+
 import { Rename } from './Rename'
 import { Tooltips } from './Tooltips'
 

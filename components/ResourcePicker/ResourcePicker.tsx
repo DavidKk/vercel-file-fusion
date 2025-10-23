@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+
 import type { DirectoryEntry, FileEntry } from '@/services/file/types'
 
 export interface ResourcePickerProps {

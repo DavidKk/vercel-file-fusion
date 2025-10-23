@@ -11,6 +11,10 @@ tsconfig.build.json
 # ESLINT
 .eslintcache
 
+# Playwright
+playwright-report/
+test-results/
+.playwright-artifacts-*
 
 # Npm or Yarn
 .yarn/*
