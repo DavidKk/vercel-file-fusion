@@ -23,10 +23,13 @@ export default function useResourcePicker(options: UseResourcePickerOptions) {
       const directories: DirectoryEntry[] = []
       const files: FileEntry[] = []
 
+      // Normalize file types to lowercase for case-insensitive matching
+      const normalizedFileTypes = fileTypes?.map((type) => type.toLowerCase())
+
       if (deep) {
         for (const entry of await globFiles(directoryHandle)) {
-          const extname = entry.name.split('.').pop()!
-          if (!fileTypes || fileTypes.includes(extname)) {
+          const extname = entry.name.split('.').pop()?.toLowerCase()
+          if (!normalizedFileTypes || (extname && normalizedFileTypes.includes(extname))) {
             files.push(entry)
           }
         }
@@ -39,8 +42,8 @@ export default function useResourcePicker(options: UseResourcePickerOptions) {
           }
 
           if (only !== 'directory' && handle.kind === 'file') {
-            const extname = name.split('.').pop()!
-            if (!fileTypes || fileTypes.includes(extname)) {
+            const extname = name.split('.').pop()?.toLowerCase()
+            if (!normalizedFileTypes || (extname && normalizedFileTypes.includes(extname))) {
               files.push({ kind: 'file', name, handle })
             }
 
