@@ -35,6 +35,10 @@ jobs:
         shell: bash
         run: pnpm install
 
+      # 安装 Playwright 浏览器（E2E 测试需要）
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
+
       # 测试
       - name: Run tests and collect coverage
         shell: bash

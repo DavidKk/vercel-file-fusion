@@ -15,7 +15,7 @@
     "format": "prettier --config .prettierrc.js --write \"**/*.{js,jsx,ts,tsx,d.ts,vue,md,json,yml,yaml}\"",
     "lint": "pnpm lint:ts",
     "lint:ts": "eslint -c eslint.config.mjs --fix .",
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "test:unitest": "jest -c ./jest.config.ts --coverage --reporters=default --reporters=jest-junit --passWithNoTests",
@@ -24,7 +24,7 @@
     "test:e2e": "playwright test --reporter=list",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:auto": "playwright test --reporter=list",
-    "ok": "pnpm format && pnpm lint && pnpm build && pnpm test && pnpm test:e2e"
+    "ok": "pnpm format && pnpm lint && pnpm build && pnpm test"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -33,6 +33,7 @@
     "@types/wicg-file-system-access": "^2023.10.5",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
+    "@unrar-browser/core": "^1.0.2",
     "@zip.js/zip.js": "^2.7.57",
     "ahooks": "^3.8.4",
     "classnames": "^2.5.1",
@@ -85,6 +86,7 @@
     "prettier": "^3.3.3",
     "pretty-error": "^4.0.0",
     "rimraf": "^6.0.1",
+    "shx": "^0.3.4",
     "spinnies": "^0.5.1",
     "tailwindcss": "^3.4.1",
     "ts-jest": "^29.2.3",

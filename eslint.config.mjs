@@ -8,7 +8,18 @@ import tsConfig from './eslintrc/ts.mjs'
 
 export default [
   {
-    ignores: ['.next/**/*', '.husky/**/*', 'coverage/**/*', 'node_modules', 'playwright-report/**/*', 'test-results/**/*', 'playwright.config.ts'],
+    ignores: [
+      '.next/**/*',
+      '.husky/**/*',
+      'coverage/**/*',
+      'node_modules',
+      'playwright-report/**/*',
+      'test-results/**/*',
+      'playwright.config.ts',
+      // 自动复制的 WASM 文件（来自 @unrar-browser/core）
+      'public/unrar.js',
+      'public/unrar.wasm',
+    ],
   },
   {
     languageOptions: {

@@ -8,6 +8,7 @@ const spinnies = new Spinnies()
 const tasks = {
   'Applies a patch to the TypeScript compiler.': 'ts-patch install -s',
   'Install git hook husky to project.': () => husky({ compatible: true }),
+  'Copy unrar WASM files to public directory.': 'shx cp node_modules/@unrar-browser/core/build/unrar.js public/unrar.js && shx cp node_modules/@unrar-browser/core/build/unrar.wasm public/unrar.wasm',
 }
 
 const executeCommand = async (command) => {
