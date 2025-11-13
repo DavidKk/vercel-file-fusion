@@ -33,7 +33,7 @@
     "@types/wicg-file-system-access": "^2023.10.5",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
-    "@unrar-browser/core": "^1.0.2",
+    "@unrar-browser/core": "1.0.3-alpha.1763050400.0",
     "@zip.js/zip.js": "^2.7.57",
     "ahooks": "^3.8.4",
     "classnames": "^2.5.1",

@@ -109,7 +109,7 @@ export default function Unrar() {
         setResults((prev) => [...prev, { file: rarFileName, loading: true }])
 
         try {
-          const extractedFiles = await extract(file, { password: resolvedPassword })
+          const extractedFiles = await extract(file, resolvedPassword)
           const filesToWrite = extractedFiles.filter((item): item is ExtractedFile & { data: Uint8Array } => !item.isDirectory && !!item.data)
           const totalFiles = filesToWrite.length || 1
           let processedFiles = 0

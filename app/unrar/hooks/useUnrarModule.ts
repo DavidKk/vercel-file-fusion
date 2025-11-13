@@ -53,20 +53,20 @@ export function useUnrarModule(): UseUnrarModuleResult {
 
         // 获取 base URL - 支持不同的部署环境
         // 从当前页面的路径自动检测 basePath
-        const runtimeBasePath =
-          process.env.NEXT_PUBLIC_UNRAR_BASE_PATH ||
-          (typeof window !== 'undefined'
-            ? (() => {
-                const { pathname } = window.location
-                const match = pathname.match(/^(.*?\/nextjs-demo)/)
-                if (match) {
-                  return `${match[1]}/`
-                }
-                return '/'
-              })()
-            : '/')
+        let basePath = '/'
+        if (typeof window !== 'undefined') {
+          const pathname = window.location.pathname
 
-        const loadedModule = await getUnrarModule(runtimeBasePath)
+          // 如果路径包含 /nextjs-demo，说明是在子路径部署
+          if (pathname.includes('/nextjs-demo')) {
+            // 提取 basePath（包含 /nextjs-demo 部分，确保以斜杠结尾）
+            const match = pathname.match(/^(.*?\/nextjs-demo)/)
+            if (match) {
+              basePath = match[1] + '/'
+            }
+          }
+        }
+        const loadedModule = await getUnrarModule(basePath)
 
         if (progressInterval) {
           clearInterval(progressInterval)

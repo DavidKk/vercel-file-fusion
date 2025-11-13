@@ -13,12 +13,8 @@ interface UseUnrarExtractorResult {
   extractedFiles: ExtractedFile[]
   isExtracting: boolean
   error: Error | null
-  extract: (file: File, options?: ExtractOptions) => Promise<ExtractedFile[]>
+  extract: (file: File, password?: string) => Promise<ExtractedFile[]>
   clear: () => void
-}
-
-interface ExtractOptions {
-  password?: string
 }
 
 export function useUnrarExtractor(module: UnrarModule | null): UseUnrarExtractorResult {
@@ -27,17 +23,22 @@ export function useUnrarExtractor(module: UnrarModule | null): UseUnrarExtractor
   const [error, setError] = useState<Error | null>(null)
 
   const extractRarFile = useCallback(
-    async (arrayBuffer: ArrayBuffer, options?: ExtractOptions): Promise<ExtractedFile[]> => {
+    async (arrayBuffer: ArrayBuffer, password?: string): Promise<ExtractedFile[]> => {
       if (!module) {
         throw new Error('UnRAR module not loaded')
+      }
+
+      // Set password if provided
+      if (password) {
+        module.setPassword(password)
+      } else {
+        module.setPassword('') // Clear password
       }
 
       const FS = module.FS
       const fileName = '/temp.rar'
 
       FS.writeFile(fileName, new Uint8Array(arrayBuffer))
-
-      module.setPassword(options?.password ?? '')
 
       const cmdData = new module.CommandData()
       const archive = new module.Archive(cmdData)
@@ -88,10 +89,8 @@ export function useUnrarExtractor(module: UnrarModule | null): UseUnrarExtractor
   )
 
   const extract = useCallback(
-    async (file: File, options?: ExtractOptions) => {
-      if (!module || isExtracting) {
-        return []
-      }
+    async (file: File, password?: string): Promise<ExtractedFile[]> => {
+      if (!module || isExtracting) return []
 
       setIsExtracting(true)
       setExtractedFiles([])
@@ -99,7 +98,7 @@ export function useUnrarExtractor(module: UnrarModule | null): UseUnrarExtractor
 
       try {
         const arrayBuffer = await file.arrayBuffer()
-        const files = await extractRarFile(arrayBuffer, options)
+        const files = await extractRarFile(arrayBuffer, password)
         setExtractedFiles(files)
         return files
       } catch (err) {
