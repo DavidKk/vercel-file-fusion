@@ -8,18 +8,7 @@ import tsConfig from './eslintrc/ts.mjs'
 
 export default [
   {
-    ignores: [
-      '.next/**/*',
-      '.husky/**/*',
-      'coverage/**/*',
-      'node_modules',
-      'playwright-report/**/*',
-      'test-results/**/*',
-      'playwright.config.ts',
-      // 自动复制的 WASM 文件（来自 @unrar-browser/core）
-      'public/unrar.js',
-      'public/unrar.wasm',
-    ],
+    ignores: ['.next/**/*', '.husky/**/*', 'coverage/**/*', 'node_modules', 'test-results/**/*', 'playwright-report/**/*', 'blob-report/**/*', 'public/unrar.js'],
   },
   {
     languageOptions: {
@@ -54,7 +43,19 @@ export default [
       'eslint-plugin-import/no-extraneous-dependencies': [
         'warn',
         {
-          devDependencies: ['**/*.spec.ts', '**/*/jest.config.*.ts', 'eslintrc/**/*.mjs', 'scripts/**/*.mjs', 'jest/**/*.ts', '.cz-config.js', '**/eslint.config.mjs'],
+          devDependencies: [
+            '**/*.spec.ts',
+            '**/*.test.ts',
+            '**/*/jest.config.*.ts',
+            'eslintrc/**/*.mjs',
+            'scripts/**/*.mjs',
+            'jest/**/*.ts',
+            '.cz-config.js',
+            '**/eslint.config.mjs',
+            '**/playwright.config.ts',
+            '**/playwright-tsconfig.json',
+            '**/__webtests__/**/*.ts',
+          ],
         },
       ],
       'eslint-plugin-simple-import-sort/exports': 'error',

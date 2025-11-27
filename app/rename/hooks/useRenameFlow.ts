@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { type ConversionType, type DirectoryInfo, type FileInfo, isConversionType } from '@/app/rename/types/types'
 import { convertChinese } from '@/services/chinese-converter'
-import { dirname, getDirectoryHandleByPath, isDirectoryHandle, isFileHandle, join, moveDirectoryRecursive } from '@/services/file'
+import { dirname, getDirectoryHandleByPath, moveDirectoryRecursive } from '@/services/file'
 import { openDirectoryPicker } from '@/services/file/common'
 
 export type ResultItemMethod = 'move' | 'copy' | 'rename'
@@ -50,11 +50,11 @@ export function useRenameFlow() {
     return convertChinese(name, 'zh-Hans', 'zh-Hant')
   }
 
-  const getAllFilesAndDirectories = async (directoryHandle: FileSystemDirectoryHandle, basePath = '', parentHandle?: FileSystemDirectoryHandle) => {
+  const getAllFilesAndDirectories = async (directoryHandle: FileSystemDirectoryHandle, basePath = '') => {
     const files: FileInfo[] = []
     const directories: DirectoryInfo[] = []
 
-    const processDirectory = async (currentDirHandle: FileSystemDirectoryHandle, currentPath: string, _currentParent?: FileSystemDirectoryHandle) => {
+    const processDirectory = async (currentDirHandle: FileSystemDirectoryHandle, currentPath: string) => {
       for await (const [name, handle] of currentDirHandle.entries()) {
         const fullPath = currentPath ? `${currentPath}/${name}` : name
 
@@ -87,12 +87,12 @@ export function useRenameFlow() {
             directoryPath: currentPath,
           })
 
-          await processDirectory(handle, fullPath, currentDirHandle)
+          await processDirectory(handle, fullPath)
         }
       }
     }
 
-    await processDirectory(directoryHandle, basePath, parentHandle)
+    await processDirectory(directoryHandle, basePath)
     return { files, directories }
   }
 

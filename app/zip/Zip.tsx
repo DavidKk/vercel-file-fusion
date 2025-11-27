@@ -157,7 +157,6 @@ export default function Zip() {
         return
       }
 
-      let processedFiles = 0
       for (const [name, file] of allFiles.entries()) {
         const basename = name.split('/').pop()!
         if (EXCLUDES_FILES.includes(basename)) {
@@ -173,7 +172,6 @@ export default function Zip() {
             setTotalProgress(writeProgress)
           },
         })
-        processedFiles += 1
       }
 
       const zipBlob = await zipWriter.close()
