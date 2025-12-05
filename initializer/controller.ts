@@ -13,9 +13,13 @@ export interface ContextWithParams<P> extends Context {
 }
 
 export function api(handle: (req: NextRequest, context: Context) => Promise<any>) {
-  return async (req: NextRequest, context: Context) => {
+  return async (req: NextRequest, context: { params: Promise<any> }) => {
     try {
-      const result = await handle(req, context)
+      const enhancedContext: Context = {
+        params: context.params,
+        searchParams: req.nextUrl.searchParams,
+      }
+      const result = await handle(req, enhancedContext)
       if (result instanceof NextResponse) {
         return result
       }
@@ -31,9 +35,13 @@ export function api(handle: (req: NextRequest, context: Context) => Promise<any>
 }
 
 export function plainText<P>(handle: (req: NextRequest, context: ContextWithParams<P>) => Promise<string>) {
-  return async (req: NextRequest, context: ContextWithParams<P>) => {
+  return async (req: NextRequest, context: { params: Promise<any> }) => {
     try {
-      const result = await handle(req, context)
+      const enhancedContext: ContextWithParams<P> = {
+        params: context.params,
+        searchParams: req.nextUrl.searchParams,
+      }
+      const result = await handle(req, enhancedContext)
       return new NextResponse(result, { status: 200 })
     } catch (error) {
       const message = stringifyUnknownError(error)
