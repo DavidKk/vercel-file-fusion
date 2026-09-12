@@ -8,7 +8,7 @@ import tsConfig from './eslintrc/ts.mjs'
 
 export default [
   {
-    ignores: ['.next/**/*', '.husky/**/*', 'coverage/**/*', 'node_modules', 'test-results/**/*', 'playwright-report/**/*', 'blob-report/**/*', 'public/unrar.js'],
+    ignores: ['.next/**/*', '.husky/**/*', 'coverage/**/*', 'node_modules', 'test-results/**/*', 'playwright-report/**/*', 'blob-report/**/*', 'public/unrar.js', 'next-env.d.ts'],
   },
   {
     languageOptions: {
