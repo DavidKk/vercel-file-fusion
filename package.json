@@ -46,7 +46,7 @@
     "next": "15.5.9",
     "opencc-js": "^1.0.5",
     "pdf-parse": "^1.1.1",
-    "pdfjs-dist": "^4.10.38",
+    "pdfjs-dist": "^6.4.299",
     "pnpm": "^10.4.0",
     "react": "^19.1.2",
     "react-dom": "^19.1.2",
