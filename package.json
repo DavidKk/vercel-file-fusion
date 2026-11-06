@@ -42,7 +42,7 @@
     "decimal.js": "^10.6.0",
     "feather-icons-react": "^0.7.1",
     "iconv-lite": "^0.7.3",
-    "music-metadata": "^10.9.0",
+    "music-metadata": "^12.3.4",
     "next": "16.4.4",
     "opencc-js": "^1.4.2",
     "pdf-parse": "^1.1.1",
