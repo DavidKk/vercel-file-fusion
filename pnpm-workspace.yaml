@@ -7,3 +7,6 @@ packages:
 allowBuilds:
   '@vercel/speed-insights': true
   core-js: true
+  # `pnpm` (direct dep) ships pre/postinstall that fetch its platform binary;
+  # not needed at build/runtime (Vercel uses packageManager via corepack).
+  pnpm: false
